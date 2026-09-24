@@ -415,17 +415,84 @@
         showToast('Stream Reloaded');
     });
 
-    document.getElementById('actionFullscreenBtn').addEventListener('click', () => {
-        const frameContainer = document.getElementById('videoFrameContainer');
-        if (!document.fullscreenElement) {
-            if (frameContainer.requestFullscreen) {
-                frameContainer.requestFullscreen();
-            } else if (frameContainer.webkitRequestFullscreen) {
-                frameContainer.webkitRequestFullscreen();
+    // ═════════ Advanced Fullscreen & Auto-Rotate Controls ═════════
+    const fullscreenBtn = document.getElementById('actionFullscreenBtn');
+    const exitFullscreenBtn = document.getElementById('btnExitFullscreen');
+
+    async function toggleFullscreenMode() {
+        const isCurrentlyFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.body.classList.contains('is-fullscreen');
+
+        if (!isCurrentlyFullscreen) {
+            document.body.classList.add('is-fullscreen');
+
+            // 1. Lock screen orientation to landscape
+            if (window.screen && window.screen.orientation && window.screen.orientation.lock) {
+                try {
+                    await window.screen.orientation.lock('landscape');
+                } catch (e) {
+                    console.log('Orientation lock note:', e);
+                }
             }
+
+            // 2. Request native browser fullscreen on container or documentElement
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(() => {});
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            }
+
+            showToast('Landscape Fullscreen');
         } else {
+            exitFullscreenMode();
+        }
+    }
+
+    async function exitFullscreenMode() {
+        document.body.classList.remove('is-fullscreen');
+
+        // 1. Unlock screen orientation
+        if (window.screen && window.screen.orientation && window.screen.orientation.unlock) {
+            try {
+                window.screen.orientation.unlock();
+            } catch (e) {
+                console.log('Orientation unlock note:', e);
+            }
+        }
+
+        // 2. Exit native fullscreen
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
             if (document.exitFullscreen) {
-                document.exitFullscreen();
+                document.exitFullscreen().catch(() => {});
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
+        }
+    }
+
+    if (fullscreenBtn) {
+        fullscreenBtn.addEventListener('click', toggleFullscreenMode);
+    }
+    if (exitFullscreenBtn) {
+        exitFullscreenBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            exitFullscreenMode();
+        });
+    }
+
+    // Auto-detect phone physical rotation
+    function checkOrientation() {
+        const isLandscape = window.innerWidth > window.innerHeight;
+        if (!isLandscape) {
+            document.body.classList.remove('is-fullscreen');
+        }
+    }
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement) {
+            if (window.innerHeight > window.innerWidth) {
+                document.body.classList.remove('is-fullscreen');
             }
         }
     });

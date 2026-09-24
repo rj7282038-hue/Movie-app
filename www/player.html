@@ -56,6 +56,11 @@
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     referrerpolicy="no-referrer">
                 </iframe>
+
+                <!-- Floating Exit Landscape/Fullscreen Button -->
+                <button class="fullscreen-exit-btn" id="btnExitFullscreen" aria-label="Exit Fullscreen">
+                    <i class="fas fa-compress"></i> <span>Exit</span>
+                </button>
             </div>
         </div>
         
@@ -151,7 +156,7 @@
     <!-- Toast -->
     <div class="app-toast" id="appToast">
         <i class="fas fa-check-circle" style="color: var(--green);"></i>
-        <span id="toastMessage">Done</span>
+        <span id="toastMessage"></span>
     </div>
 
     <!-- Scripts -->

@@ -8,8 +8,9 @@
     --player-max-h: 420px;
 }
 
-body.player-page {
-    background-color: #08080c;
+html, body.player-page {
+    background-color: #000000 !important;
+    background: #000000 !important;
     padding-bottom: calc(var(--safe-bottom) + 40px);
 }
 
@@ -488,4 +489,151 @@ body.player-page {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Immersive Fullscreen & Auto-Landscape Styling
+   ═══════════════════════════════════════════════════════════════ */
+.fullscreen-exit-btn {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 100000;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    background: rgba(18, 18, 24, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    padding: 8px 14px;
+    border-radius: 9999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+    transition: opacity 0.3s ease, transform 0.2s ease;
+}
+
+.fullscreen-exit-btn:active {
+    transform: scale(0.93);
+}
+
+/* When in Landscape OR when .is-fullscreen class is active */
+@media (orientation: landscape), (max-height: 520px) {
+    html, body.player-page {
+        overflow: hidden !important;
+        background: #000000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+    }
+
+    body.player-page .player-nav-header,
+    body.player-page .server-bar,
+    body.player-page .episode-quick-controls,
+    body.player-page .player-details-body {
+        display: none !important;
+    }
+
+    body.player-page .cinema-stage {
+        position: fixed !important;
+        inset: 0 !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 999999 !important;
+        background: #000000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+    }
+
+    body.player-page .ambient-glow-wrapper,
+    body.player-page .video-frame-box {
+        position: absolute !important;
+        inset: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #000000 !important;
+    }
+
+    body.player-page .ambient-glow-diffuser {
+        display: none !important;
+    }
+
+    body.player-page .video-frame-box iframe {
+        position: absolute !important;
+        inset: 0 !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        border: none !important;
+        background: #000000 !important;
+    }
+
+    body.player-page .fullscreen-exit-btn {
+        display: flex !important;
+    }
+}
+
+body.is-fullscreen {
+    overflow: hidden !important;
+    background: #000000 !important;
+}
+
+body.is-fullscreen .player-nav-header,
+body.is-fullscreen .server-bar,
+body.is-fullscreen .episode-quick-controls,
+body.is-fullscreen .player-details-body {
+    display: none !important;
+}
+
+body.is-fullscreen .cinema-stage {
+    position: fixed !important;
+    inset: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 999999 !important;
+    background: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body.is-fullscreen .ambient-glow-wrapper,
+body.is-fullscreen .video-frame-box {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #000000 !important;
+}
+
+body.is-fullscreen .video-frame-box iframe {
+    position: absolute !important;
+    inset: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    border: none !important;
+    background: #000000 !important;
+}
+
+body.is-fullscreen .fullscreen-exit-btn {
+    display: flex !important;
 }

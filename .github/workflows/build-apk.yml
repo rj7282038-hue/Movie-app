@@ -55,7 +55,12 @@ jobs:
             
             # Enable usesCleartextTraffic & hardwareAccelerated on application tag
             sed -i 's/<application /<application android:usesCleartextTraffic="true" android:hardwareAccelerated="true" /g' "$MANIFEST"
-            echo "Manifest configured with network permissions and hardware acceleration!"
+            
+            # Allow full sensor orientation (auto-rotate in all directions)
+            sed -i 's/android:screenOrientation="portrait"/android:screenOrientation="fullSensor"/g' "$MANIFEST"
+            sed -i '/<activity/ s/>/ android:screenOrientation="fullSensor">/' "$MANIFEST"
+            
+            echo "Manifest configured with network permissions, hardware acceleration, and full sensor auto-rotation!"
           fi
 
       - name: Build Android Debug APK with Gradle

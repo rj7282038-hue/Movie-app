@@ -4,8 +4,8 @@
   "description": "Stream thousands of movies, TV shows, and anime with smooth high-speed playback.",
   "start_url": "index.html",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#0a0a0e",
+  "orientation": "any",
+  "background_color": "#000000",
   "theme_color": "#0a0a0e",
   "icons": [
     {

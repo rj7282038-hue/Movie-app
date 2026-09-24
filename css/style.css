@@ -54,6 +54,7 @@ html {
     scroll-behavior: smooth;
     font-size: 16px;
     height: 100%;
+    background-color: #000000;
 }
 
 body {
@@ -954,7 +955,9 @@ body {
     position: fixed;
     bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 16px);
     left: 50%;
-    transform: translateX(-50%) translateY(80px);
+    transform: translateX(-50%) translateY(20px);
+    opacity: 0;
+    visibility: hidden;
     background: rgba(24, 24, 34, 0.95);
     border: 1px solid var(--border-highlight);
     border-left: 4px solid var(--primary);
@@ -968,11 +971,13 @@ body {
     align-items: center;
     gap: 8px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
-    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0.3s;
     pointer-events: none;
 }
 
 .app-toast.show {
+    opacity: 1;
+    visibility: visible;
     transform: translateX(-50%) translateY(0);
 }
 
