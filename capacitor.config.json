@@ -1,7 +1,7 @@
 {
   "appId": "com.ghazi.ott",
   "appName": "Ghazi OTT",
-  "webDir": ".",
+  "webDir": "www",
   "bundledWebRuntime": false,
   "server": {
     "androidScheme": "https",
