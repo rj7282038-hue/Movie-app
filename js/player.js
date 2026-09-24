@@ -28,32 +28,32 @@
     // ═════════ Multi-Server URLs Builder ═════════
     function getServerUrl(serverKey, id, type, s, e) {
         switch (serverKey) {
-            case '1': // Videasy Pro (Ultra Fast, Clean UI, Auto Next Ep)
+            case '1': // VidLink Pro (Fastest, Clean 1080p, Working Touch Controls)
                 if (type === 'tv') {
-                    return `https://player.videasy.net/tv/${id}/${s}/${e}?overlay=true&color=E50914&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true`;
+                    return `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=e50914&secondaryColor=121218&iconColor=ffffff`;
                 }
-                return `https://player.videasy.net/movie/${id}?overlay=true&color=E50914`;
+                return `https://vidlink.pro/movie/${id}?primaryColor=e50914&secondaryColor=121218&iconColor=ffffff`;
 
-            case '2': // Vidsrc VIP (Direct Multi-Quality Embed)
+            case '2': // Videasy Ultra (Clean embed, no ad overlay, working play/pause)
+                if (type === 'tv') {
+                    return `https://player.videasy.net/tv/${id}/${s}/${e}?color=E50914&nextEpisode=true`;
+                }
+                return `https://player.videasy.net/movie/${id}?color=E50914`;
+
+            case '3': // Vidsrc VIP (Direct Multi-Quality Embed)
                 if (type === 'tv') {
                     return `https://vidsrc.to/embed/tv/${id}/${s}/${e}`;
                 }
                 return `https://vidsrc.to/embed/movie/${id}`;
 
-            case '3': // Smashy Auto (Reliable Fallback)
+            case '4': // Smashy Auto (Reliable Fallback)
                 if (type === 'tv') {
                     return `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`;
                 }
                 return `https://embed.smashystream.com/playere.php?tmdb=${id}`;
 
-            case '4': // SuperEmbed / MultiEmbed
-                if (type === 'tv') {
-                    return `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}`;
-                }
-                return `https://multiembed.mov/?video_id=${id}&tmdb=1`;
-
             default:
-                return `https://player.videasy.net/movie/${id}?color=E50914`;
+                return `https://vidlink.pro/movie/${id}?primaryColor=e50914`;
         }
     }
 
@@ -91,12 +91,13 @@
         });
 
         const serverNames = {
-            '1': 'Videasy Pro HD',
-            '2': 'Vidsrc VIP',
-            '3': 'Smashy Auto',
-            '4': 'SuperEmbed'
+            '1': 'VidLink Pro',
+            '2': 'Videasy Ultra',
+            '3': 'Vidsrc VIP',
+            '4': 'Smashy Auto'
         };
         statusText.textContent = `Connecting to ${serverNames[serverKey] || 'Server'}...`;
+        loader.style.display = 'flex';
         loader.classList.remove('hidden');
 
         if (failsafeTimer) clearTimeout(failsafeTimer);
@@ -106,6 +107,7 @@
         iframe.onload = () => {
             if (myToken !== loadToken) return;
             loader.classList.add('hidden');
+            loader.style.display = 'none';
         };
 
         iframe.src = targetUrl;
@@ -114,8 +116,9 @@
         failsafeTimer = setTimeout(() => {
             if (myToken === loadToken) {
                 loader.classList.add('hidden');
+                loader.style.display = 'none';
             }
-        }, 3200);
+        }, 1800);
 
         // Update URL query in address bar quietly
         if (history.replaceState) {
@@ -415,9 +418,58 @@
         showToast('Stream Reloaded');
     });
 
-    // ═════════ Advanced Fullscreen & Auto-Rotate Controls ═════════
+    // ═════════ Advanced Fullscreen, Zoom & Auto-Rotate Controls ═════════
     const fullscreenBtn = document.getElementById('actionFullscreenBtn');
     const exitFullscreenBtn = document.getElementById('btnExitFullscreen');
+    const toggleZoomBtn = document.getElementById('btnToggleZoom');
+    const zoomBtnText = document.getElementById('zoomBtnText');
+    const serverQuickBtn = document.getElementById('btnServerQuick');
+    const serverQuickText = document.getElementById('serverQuickText');
+    const videoContainer = document.getElementById('videoFrameContainer');
+    const landscapeControls = document.getElementById('landscapeControls');
+
+    let controlsTimeout = null;
+    function pingControls() {
+        if (!landscapeControls) return;
+        landscapeControls.classList.remove('fade-out');
+        if (controlsTimeout) clearTimeout(controlsTimeout);
+        controlsTimeout = setTimeout(() => {
+            landscapeControls.classList.add('fade-out');
+        }, 3400);
+    }
+
+    if (landscapeControls) {
+        document.addEventListener('touchstart', pingControls, { passive: true });
+        document.addEventListener('click', pingControls, { passive: true });
+    }
+
+    // Zoom / Screen Fill Toggle (100% Widescreen edge-to-edge)
+    let isZoomFilled = false;
+    if (toggleZoomBtn && videoContainer) {
+        toggleZoomBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            isZoomFilled = !isZoomFilled;
+            videoContainer.classList.toggle('zoom-fill', isZoomFilled);
+            toggleZoomBtn.classList.toggle('active', isZoomFilled);
+            if (zoomBtnText) {
+                zoomBtnText.textContent = isZoomFilled ? 'Fit 16:9' : 'Fill Screen';
+            }
+            showToast(isZoomFilled ? 'Zoom to Fill: Full Screen Edge-to-Edge' : 'Fit Screen: Original Ratio');
+            pingControls();
+        });
+    }
+
+    // Quick switch server inside fullscreen
+    if (serverQuickBtn) {
+        serverQuickBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const nextServer = currentServer === '1' ? '2' : currentServer === '2' ? '3' : currentServer === '3' ? '4' : '1';
+            loadStream(nextServer);
+            if (serverQuickText) serverQuickText.textContent = `S${nextServer}`;
+            showToast(`Switched to Server ${nextServer}`);
+            pingControls();
+        });
+    }
 
     async function toggleFullscreenMode() {
         const isCurrentlyFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.body.classList.contains('is-fullscreen');
@@ -434,15 +486,16 @@
                 }
             }
 
-            // 2. Request native browser fullscreen on container or documentElement
+            // 2. Request native browser fullscreen with hidden navigation UI
             const elem = document.documentElement;
             if (elem.requestFullscreen) {
-                elem.requestFullscreen().catch(() => {});
+                elem.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
             } else if (elem.webkitRequestFullscreen) {
                 elem.webkitRequestFullscreen();
             }
 
-            showToast('Landscape Fullscreen');
+            showToast('Landscape Cinema Mode');
+            pingControls();
         } else {
             exitFullscreenMode();
         }
@@ -483,7 +536,14 @@
     // Auto-detect phone physical rotation
     function checkOrientation() {
         const isLandscape = window.innerWidth > window.innerHeight;
-        if (!isLandscape) {
+        if (isLandscape) {
+            document.body.classList.add('is-fullscreen');
+            const elem = document.documentElement;
+            if (!document.fullscreenElement && elem.requestFullscreen) {
+                elem.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+            }
+            pingControls();
+        } else {
             document.body.classList.remove('is-fullscreen');
         }
     }

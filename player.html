@@ -52,15 +52,27 @@
                 <iframe
                     id="videoPlayerFrame"
                     src=""
-                    allowfullscreen
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowfullscreen="true"
+                    webkitallowfullscreen="true"
+                    mozallowfullscreen="true"
+                    allow="accelerometer; autoplay *; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *"
                     referrerpolicy="no-referrer">
                 </iframe>
 
-                <!-- Floating Exit Landscape/Fullscreen Button -->
-                <button class="fullscreen-exit-btn" id="btnExitFullscreen" aria-label="Exit Fullscreen">
-                    <i class="fas fa-compress"></i> <span>Exit</span>
-                </button>
+                <!-- Floating Landscape / Fullscreen Controls Overlay -->
+                <div class="landscape-floating-controls" id="landscapeControls">
+                    <button class="cinema-ctrl-btn" id="btnExitFullscreen" aria-label="Exit Fullscreen">
+                        <i class="fas fa-arrow-left"></i> <span>Back</span>
+                    </button>
+                    <div class="ctrl-group-right">
+                        <button class="cinema-ctrl-btn" id="btnToggleZoom" aria-label="Toggle Screen Fill">
+                            <i class="fas fa-maximize"></i> <span id="zoomBtnText">Fill Screen</span>
+                        </button>
+                        <button class="cinema-ctrl-btn" id="btnServerQuick" aria-label="Next Server">
+                            <i class="fas fa-server"></i> <span id="serverQuickText">S1</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -68,16 +80,16 @@
         <div class="server-bar">
             <span class="server-label-hint"><i class="fas fa-server"></i> Server:</span>
             <button class="server-pill active" data-server="1">
-                <span class="dot"></span> Videasy Pro
+                <span class="dot"></span> VidLink Pro (Fast)
             </button>
             <button class="server-pill" data-server="2">
-                <span class="dot"></span> Vidsrc VIP
+                <span class="dot"></span> Videasy Ultra
             </button>
             <button class="server-pill" data-server="3">
-                <span class="dot"></span> Smashy Auto
+                <span class="dot"></span> Vidsrc VIP
             </button>
             <button class="server-pill" data-server="4">
-                <span class="dot"></span> SuperEmbed
+                <span class="dot"></span> Smashy Auto
             </button>
         </div>
 

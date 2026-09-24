@@ -111,8 +111,10 @@ html, body.player-page {
 }
 
 .player-loader-state.hidden {
-    opacity: 0;
-    pointer-events: none;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    display: none !important;
+    pointer-events: none !important;
 }
 
 .stream-spinner {
@@ -492,43 +494,74 @@ html, body.player-page {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   Immersive Fullscreen & Auto-Landscape Styling
+   Immersive Fullscreen & Landscape Cinema Styling
    ═══════════════════════════════════════════════════════════════ */
-.fullscreen-exit-btn {
+.landscape-floating-controls {
     position: absolute;
-    top: 14px;
-    left: 14px;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 14px 18px;
     z-index: 100000;
     display: none;
     align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
+    pointer-events: auto;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.landscape-floating-controls.fade-out {
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+}
+
+.ctrl-group-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cinema-ctrl-btn {
+    display: inline-flex;
+    align-items: center;
     gap: 8px;
-    background: rgba(18, 18, 24, 0.85);
+    background: rgba(20, 20, 28, 0.85);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.22);
     color: #ffffff;
     padding: 8px 14px;
     border-radius: 9999px;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
-    transition: opacity 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.7);
+    transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
-.fullscreen-exit-btn:active {
-    transform: scale(0.93);
+.cinema-ctrl-btn:active {
+    transform: scale(0.92);
+}
+
+.cinema-ctrl-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    box-shadow: 0 2px 14px var(--primary-glow);
 }
 
 /* When in Landscape OR when .is-fullscreen class is active */
-@media (orientation: landscape), (max-height: 520px) {
+@media (orientation: landscape), (max-height: 540px) {
     html, body.player-page {
         overflow: hidden !important;
         background: #000000 !important;
+        background-color: #000000 !important;
         margin: 0 !important;
         padding: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
+        width: 100% !important;
+        height: 100% !important;
     }
 
     body.player-page .player-nav-header,
@@ -545,10 +578,11 @@ html, body.player-page {
         left: 0 !important;
         right: 0 !important;
         bottom: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
+        width: 100% !important;
+        height: 100% !important;
         z-index: 999999 !important;
         background: #000000 !important;
+        background-color: #000000 !important;
         margin: 0 !important;
         padding: 0 !important;
         border: none !important;
@@ -558,11 +592,17 @@ html, body.player-page {
     body.player-page .video-frame-box {
         position: absolute !important;
         inset: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
         padding: 0 !important;
         margin: 0 !important;
         background: #000000 !important;
+        background-color: #000000 !important;
+        overflow: hidden !important;
     }
 
     body.player-page .ambient-glow-diffuser {
@@ -574,13 +614,23 @@ html, body.player-page {
         inset: 0 !important;
         top: 0 !important;
         left: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
         border: none !important;
         background: #000000 !important;
+        background-color: #000000 !important;
+        transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
-    body.player-page .fullscreen-exit-btn {
+    /* Video Zoom to Fill (100% Edge-to-Edge Screen, No Side Bars) */
+    body.player-page .video-frame-box.zoom-fill iframe {
+        transform: scale(1.33) !important;
+        transform-origin: center center !important;
+    }
+
+    body.player-page .landscape-floating-controls {
         display: flex !important;
     }
 }
@@ -588,6 +638,7 @@ html, body.player-page {
 body.is-fullscreen {
     overflow: hidden !important;
     background: #000000 !important;
+    background-color: #000000 !important;
 }
 
 body.is-fullscreen .player-nav-header,
@@ -604,23 +655,31 @@ body.is-fullscreen .cinema-stage {
     left: 0 !important;
     right: 0 !important;
     bottom: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
+    width: 100% !important;
+    height: 100% !important;
     z-index: 999999 !important;
     background: #000000 !important;
+    background-color: #000000 !important;
     margin: 0 !important;
     padding: 0 !important;
+    border: none !important;
 }
 
 body.is-fullscreen .ambient-glow-wrapper,
 body.is-fullscreen .video-frame-box {
     position: absolute !important;
     inset: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
     background: #000000 !important;
+    background-color: #000000 !important;
+    overflow: hidden !important;
 }
 
 body.is-fullscreen .video-frame-box iframe {
@@ -628,12 +687,21 @@ body.is-fullscreen .video-frame-box iframe {
     inset: 0 !important;
     top: 0 !important;
     left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
     border: none !important;
     background: #000000 !important;
+    background-color: #000000 !important;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-body.is-fullscreen .fullscreen-exit-btn {
+body.is-fullscreen .video-frame-box.zoom-fill iframe {
+    transform: scale(1.33) !important;
+    transform-origin: center center !important;
+}
+
+body.is-fullscreen .landscape-floating-controls {
     display: flex !important;
 }
