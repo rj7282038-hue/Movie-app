@@ -499,12 +499,15 @@
         });
     }
 
-    // Audio Hint Button in Landscape / Fullscreen Controls
+    // Audio Switch Button in Landscape / Fullscreen Controls
     const btnAudioHint = document.getElementById('btnAudioHint');
     if (btnAudioHint) {
         btnAudioHint.addEventListener('click', (e) => {
             e.stopPropagation();
-            showToast('Audio Change: Player me ⚙️ settings dabayein, ya server switch karein');
+            const targetServer = currentServer === '1' ? '2' : '1';
+            loadStream(targetServer);
+            if (serverQuickText) serverQuickText.textContent = `S${targetServer}`;
+            showToast(targetServer === '2' ? 'Switched to Hindi / Dual Audio' : 'Switched to Multi-Audio Stream');
             pingControls();
         });
     }

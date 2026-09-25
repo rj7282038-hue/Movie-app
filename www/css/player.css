@@ -138,31 +138,11 @@ html, body.player-page {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   Quick Server Switching Bar & Audio Language Guide
+   Quick Server Switching Bar
    ═══════════════════════════════════════════════════════════════ */
 .server-bar-wrapper {
     background: var(--bg-surface);
     border-bottom: 1px solid var(--border-subtle);
-}
-
-.audio-lang-guide {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    background: rgba(229, 9, 20, 0.08);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    font-size: 0.72rem;
-    color: var(--text-secondary);
-    line-height: 1.35;
-}
-
-.audio-guide-text {
-    flex: 1;
-}
-
-.audio-guide-text strong {
-    color: #ffffff;
 }
 
 .server-bar {
