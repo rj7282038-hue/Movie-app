@@ -155,7 +155,7 @@
         const year = (item.release_date || item.first_air_date || '').substring(0, 4);
         const rating = item.vote_average ? Number(item.vote_average).toFixed(1) : '7.0';
         const quality = getVideoQuality(item);
-        const hasMultiAudio = isMultiAudioSupported(item);
+        const isTop = item.vote_average >= 8.0;
 
         const card = document.createElement('div');
         card.className = 'movie-card';
@@ -166,8 +166,7 @@
             <div class="card-poster-wrapper">
                 <img src="${posterUrl}" alt="${escapeHtml(title)}" loading="lazy" onerror="this.src='https://via.placeholder.com/342x513/14141c/ffffff?text=${encodeURIComponent(title)}';">
                 <div class="card-badge-rating"><i class="fas fa-star"></i>${rating}</div>
-                <div class="card-badge-quality ${quality.class}" title="${quality.desc}">${quality.label}</div>
-                ${hasMultiAudio ? '<div class="card-badge-lang"><i class="fas fa-globe"></i> Multi-Audio</div>' : ''}
+                ${isTop ? '<div class="card-badge-top">Top</div>' : ''}
             </div>
             <div class="card-info-peek">
                 <div class="card-title-text">${escapeHtml(title)}</div>
@@ -226,7 +225,6 @@
                         <span>${year}</span>
                         <span class="quality-badge">${rating} ★</span>
                         <span class="quality-badge">4K ULTRA HD</span>
-                        <span class="drawer-audio-pill"><i class="fas fa-headphones"></i> Multi-Audio</span>
                     </div>
                     <div class="hero-actions">
                         <button class="btn-play-primary" data-id="${m.id}" data-type="movie">
@@ -618,7 +616,6 @@
             const lang = data.original_language ? data.original_language.toUpperCase() : 'EN';
 
             const quality = getVideoQuality(data);
-            const hasMultiAudio = isMultiAudioSupported(data);
 
             currentSheetItem = { id, title, poster, year, type };
 
@@ -629,14 +626,13 @@
                 <span style="color:var(--green);font-weight:800;">${match}% Match</span>
                 <span>${year}</span>
                 <span class="drawer-quality-pill ${quality.class}">${quality.label}</span>
-                ${hasMultiAudio ? '<span class="drawer-audio-pill"><i class="fas fa-headphones"></i> Multi-Audio</span>' : ''}
                 <span style="background:rgba(255,255,255,0.15);padding:1px 6px;border-radius:3px;">${rating} ★</span>
                 <span>${runtime} min</span>
                 <span style="border:1px solid var(--border-subtle);padding:1px 6px;border-radius:3px;">${type === 'tv' ? 'TV SERIES' : 'MOVIE'}</span>
             `;
             document.getElementById('drawerCast').textContent = cast;
             document.getElementById('drawerGenres').textContent = genres;
-            document.getElementById('drawerLang').textContent = hasMultiAudio ? `${lang} (Multi-Audio Support)` : lang;
+            document.getElementById('drawerLang').textContent = lang;
 
             document.getElementById('drawerPlayBtn').onclick = () => {
                 closeBottomSheet();

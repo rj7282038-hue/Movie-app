@@ -126,7 +126,7 @@
         });
 
         const serverNames = {
-            '1': 'VidLink Pro (Multi-Audio)',
+            '1': 'VidLink Pro (HD/4K)',
             '2': 'Smashy Stream (Hindi / Dual)',
             '3': 'Videasy (Multi-Lang)',
             '4': 'SuperEmbed (Global Dubs)'
@@ -209,7 +209,6 @@
                 <span class="match-pct">${match}% Match</span>
                 <span>${year}</span>
                 <span class="meta-quality-pill ${quality.class}">${quality.label}</span>
-                ${hasMultiAudio ? '<span class="meta-audio-pill"><i class="fas fa-headphones"></i> Multi-Audio</span>' : ''}
                 <span style="background:rgba(255,255,255,0.14);padding:1px 6px;border-radius:3px;font-weight:700;">${rating} ★</span>
                 ${runtime ? `<span>${runtime} min</span>` : ''}
                 <span style="border:1px solid var(--border-subtle);padding:1px 6px;border-radius:3px;">${mediaType === 'tv' ? 'TV SERIES' : 'MOVIE'}</span>
@@ -507,7 +506,7 @@
             const targetServer = currentServer === '1' ? '2' : '1';
             loadStream(targetServer);
             if (serverQuickText) serverQuickText.textContent = `S${targetServer}`;
-            showToast(targetServer === '2' ? 'Switched to Hindi / Dual Audio' : 'Switched to Multi-Audio Stream');
+            showToast(targetServer === '2' ? 'Switched to Hindi / Dual Audio' : 'Switched to Server 1');
             pingControls();
         });
     }
@@ -616,7 +615,7 @@
         const title = mediaDetails ? (mediaDetails.title || mediaDetails.name) : 'Watch on EPIC OTT';
         const shareData = {
             title: `${title} — EPIC OTT`,
-            text: `Watch ${title} on EPIC OTT with 4K / Multi-Audio streaming!`,
+            text: `Watch ${title} on EPIC OTT in HD & 4K!`,
             url: window.location.href
         };
         if (navigator.share) {
