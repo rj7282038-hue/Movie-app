@@ -140,13 +140,45 @@
             btn.classList.toggle('active', btn.dataset.server === serverKey);
         });
 
+        // If Local (Multi-Lang) Engine is selected
+        if (serverKey === 'local') {
+            if (iframe) {
+                iframe.style.display = 'none';
+                iframe.src = 'about:blank';
+            }
+            if (loader) {
+                loader.classList.add('hidden');
+                loader.style.display = 'none';
+            }
+            if (localPlayerContainer) {
+                localPlayerContainer.style.display = 'flex';
+            }
+            if (serverQuickText) {
+                serverQuickText.textContent = 'Local';
+            }
+            showToast('📁 In-App MKV (Multi-Lang) Player Active');
+            return;
+        }
+
+        // Online Streaming Servers (1-6)
+        if (localPlayerContainer) {
+            localPlayerContainer.style.display = 'none';
+            if (localVideo && !localVideo.paused) {
+                localVideo.pause();
+            }
+        }
+        if (iframe) {
+            iframe.style.display = 'block';
+        }
+
         const serverNames = {
             '1': 'Smashy Stream (Hindi / Dual)',
             '2': 'VidLink Pro (HD/4K)',
             '3': 'Videasy (Multi-Lang)',
             '4': 'SuperEmbed (Global Dubs)',
             '5': 'Embed.su (Multi-Stream)',
-            '6': 'AutoEmbed (Multi-Audio)'
+            '6': 'AutoEmbed (Multi-Audio)',
+            'local': 'Local (Multi-Lang MKV Player)'
         };
         statusText.textContent = `Connecting to ${serverNames[serverKey] || 'Server'}...`;
         loader.style.display = 'flex';
@@ -183,7 +215,9 @@
     serverButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             loadStream(btn.dataset.server);
-            showToast(`Switched to Server ${btn.dataset.server}`);
+            if (btn.dataset.server !== 'local') {
+                showToast(`Switched to Server ${btn.dataset.server}`);
+            }
         });
     });
 
@@ -520,10 +554,14 @@
     if (btnAudioHint) {
         btnAudioHint.addEventListener('click', (e) => {
             e.stopPropagation();
-            const targetServer = currentServer === '1' ? '2' : '1';
-            loadStream(targetServer);
-            if (serverQuickText) serverQuickText.textContent = `S${targetServer}`;
-            showToast(targetServer === '1' ? 'Switched to Hindi / Dual Audio (Server 1)' : 'Switched to VidLink Pro (Server 2)');
+            if (currentServer === 'local') {
+                if (localBtnAudioTrack) localBtnAudioTrack.click();
+            } else {
+                const targetServer = currentServer === '1' ? '2' : '1';
+                loadStream(targetServer);
+                if (serverQuickText) serverQuickText.textContent = `S${targetServer}`;
+                showToast(targetServer === '1' ? 'Switched to Hindi / Dual Audio (Server 1)' : 'Switched to VidLink Pro (Server 2)');
+            }
             pingControls();
         });
     }
@@ -532,10 +570,12 @@
     if (serverQuickBtn) {
         serverQuickBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const nextServer = String((parseInt(currentServer, 10) % 6) + 1);
+            const serverList = ['1', '2', '3', '4', '5', '6', 'local'];
+            const idx = serverList.indexOf(currentServer);
+            const nextServer = serverList[(idx + 1) % serverList.length];
             loadStream(nextServer);
-            if (serverQuickText) serverQuickText.textContent = `S${nextServer}`;
-            showToast(`Switched to Server ${nextServer}`);
+            if (serverQuickText) serverQuickText.textContent = nextServer === 'local' ? 'Local' : `S${nextServer}`;
+            showToast(nextServer === 'local' ? 'Switched to Local MKV Player' : `Switched to Server ${nextServer}`);
             pingControls();
         });
     }
@@ -704,6 +744,9 @@
 
     function getSelectedExternalUrl() {
         const sKey = extServerSelect ? extServerSelect.value : currentServer;
+        if (sKey === 'local' && localVideo && localVideo.src) {
+            return localVideo.src;
+        }
         return getServerUrl(sKey, mediaId, mediaType, currentSeason, currentEpisode);
     }
 
@@ -799,6 +842,560 @@
             } catch (err) {
                 showToast('Link select karke manually copy karein');
             }
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // In-App MKV & Multi-Lang Local Player Controller
+    // ═══════════════════════════════════════════════════════════════
+    const localPlayerContainer = document.getElementById('localPlayerContainer');
+    const localPickerHub = document.getElementById('localPickerHub');
+    const localActivePlayer = document.getElementById('localActivePlayer');
+    const localFileInput = document.getElementById('localFileInput');
+    const btnChooseLocalFile = document.getElementById('btnChooseLocalFile');
+    const localStreamUrlInput = document.getElementById('localStreamUrlInput');
+    const btnPlayStreamUrl = document.getElementById('btnPlayStreamUrl');
+    const btnPlayDemoClip = document.getElementById('btnPlayDemoClip');
+
+    const localVideo = document.getElementById('localVideoElement');
+    const localVideoSurface = document.getElementById('localVideoSurface');
+    const localPlayingTitle = document.getElementById('localPlayingTitle');
+    const btnLocalChangeFile = document.getElementById('btnLocalChangeFile');
+    const btnLocalExternal = document.getElementById('btnLocalExternal');
+
+    const localCtrlCenter = document.getElementById('localCtrlCenter');
+    const localBtnPlayPause = document.getElementById('localBtnPlayPause');
+    const localPlayIcon = document.getElementById('localPlayIcon');
+    const localBtnRewind = document.getElementById('localBtnRewind');
+    const localBtnForward = document.getElementById('localBtnForward');
+
+    const localCtrlTop = document.getElementById('localCtrlTop');
+    const localCtrlBottom = document.getElementById('localCtrlBottom');
+    const localProgressWrap = document.getElementById('localProgressWrap');
+    const localBufferedBar = document.getElementById('localBufferedBar');
+    const localCurrentBar = document.getElementById('localCurrentBar');
+    const localProgressThumb = document.getElementById('localProgressThumb');
+
+    const localBtnPlayPauseMini = document.getElementById('localBtnPlayPauseMini');
+    const localMiniPlayIcon = document.getElementById('localMiniPlayIcon');
+    const localTimeDisplay = document.getElementById('localTimeDisplay');
+
+    const localBtnAudioTrack = document.getElementById('localBtnAudioTrack');
+    const localAudioBadge = document.getElementById('localAudioBadge');
+    const localAudioDrawer = document.getElementById('localAudioDrawer');
+    const localAudioTrackList = document.getElementById('localAudioTrackList');
+    const btnAudioDrawerClose = document.getElementById('btnAudioDrawerClose');
+
+    const localBtnSubtitles = document.getElementById('localBtnSubtitles');
+    const localSubBadge = document.getElementById('localSubBadge');
+    const localSubtitlesDrawer = document.getElementById('localSubtitlesDrawer');
+    const localSubtitleList = document.getElementById('localSubtitleList');
+    const btnSubDrawerClose = document.getElementById('btnSubDrawerClose');
+    const localSubFileInput = document.getElementById('localSubFileInput');
+    const btnChooseSubFile = document.getElementById('btnChooseSubFile');
+
+    const localBtnSpeed = document.getElementById('localBtnSpeed');
+    const localSpeedText = document.getElementById('localSpeedText');
+    const localBtnAspect = document.getElementById('localBtnAspect');
+    const localBtnFullscreen = document.getElementById('localBtnFullscreen');
+
+    let isLocalPlaying = false;
+    let localControlsTimeout = null;
+    let localAspectMode = 0; // 0: Fit, 1: Fill, 2: Stretch
+    let localSpeedIdx = 1;
+    const localSpeeds = [0.75, 1.0, 1.25, 1.5, 2.0];
+    let isScrubbing = false;
+    let activeAudioTrackIndex = 0;
+    let audioContext = null;
+    let audioPanner = null;
+    let audioGain = null;
+
+    function initWebAudio() {
+        if (audioContext || !localVideo) return;
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            audioContext = new AudioCtx();
+            const source = audioContext.createMediaElementSource(localVideo);
+            audioPanner = audioContext.createStereoPanner ? audioContext.createStereoPanner() : null;
+            audioGain = audioContext.createGain();
+
+            if (audioPanner) {
+                source.connect(audioPanner);
+                audioPanner.connect(audioGain);
+            } else {
+                source.connect(audioGain);
+            }
+            audioGain.connect(audioContext.destination);
+        } catch (e) {
+            console.warn('WebAudio init error (CORS or codec restriction):', e);
+        }
+    }
+
+    function formatTime(sec) {
+        if (!sec || isNaN(sec) || !isFinite(sec)) return '00:00';
+        sec = Math.floor(sec);
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        const s = sec % 60;
+        if (h > 0) {
+            return `${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+        return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    function pingLocalControls() {
+        if (!localActivePlayer) return;
+        localActivePlayer.classList.remove('controls-faded');
+        if (localControlsTimeout) clearTimeout(localControlsTimeout);
+        if (localVideo && !localVideo.paused) {
+            localControlsTimeout = setTimeout(() => {
+                const isDrawerOpen = (localAudioDrawer && localAudioDrawer.classList.contains('active')) ||
+                                     (localSubtitlesDrawer && localSubtitlesDrawer.classList.contains('active'));
+                if (!isDrawerOpen) {
+                    localActivePlayer.classList.add('controls-faded');
+                }
+            }, 3500);
+        }
+    }
+
+    function updatePlayPauseIcons(isPlaying) {
+        isLocalPlaying = isPlaying;
+        const iconClass = isPlaying ? 'fas fa-pause' : 'fas fa-play';
+        if (localPlayIcon) localPlayIcon.className = iconClass;
+        if (localMiniPlayIcon) localMiniPlayIcon.className = iconClass;
+    }
+
+    function toggleLocalPlayPause() {
+        if (!localVideo) return;
+        if (localVideo.paused) {
+            localVideo.play().then(() => {
+                updatePlayPauseIcons(true);
+                pingLocalControls();
+            }).catch(() => {});
+        } else {
+            localVideo.pause();
+            updatePlayPauseIcons(false);
+            pingLocalControls();
+        }
+    }
+
+    function seekLocal(delta) {
+        if (!localVideo) return;
+        localVideo.currentTime = Math.max(0, Math.min(localVideo.duration || 0, localVideo.currentTime + delta));
+        pingLocalControls();
+        showToast(delta > 0 ? '+10s Forward' : '-10s Rewind');
+    }
+
+    function loadLocalVideo(sourceUrl, displayName) {
+        if (!localVideo) return;
+        if (localPlayingTitle) localPlayingTitle.textContent = displayName || 'Video';
+        if (localPickerHub) localPickerHub.style.display = 'none';
+        if (localActivePlayer) localActivePlayer.style.display = 'flex';
+        localVideo.src = sourceUrl;
+        localVideo.load();
+        localVideo.play().then(() => {
+            updatePlayPauseIcons(true);
+            pingLocalControls();
+            showToast(`Now Playing: ${displayName || 'Local MKV Video'}`);
+        }).catch(err => {
+            console.warn('Autoplay prevented:', err);
+            updatePlayPauseIcons(false);
+            showToast('Tap Play to begin video');
+        });
+        updateAudioTracksList();
+        updateSubtitlesList();
+    }
+
+    if (localVideo) {
+        localVideo.addEventListener('timeupdate', () => {
+            if (isScrubbing) return;
+            const current = localVideo.currentTime;
+            const duration = localVideo.duration || 0;
+            const pct = duration > 0 ? (current / duration) * 100 : 0;
+            if (localCurrentBar) localCurrentBar.style.width = `${pct}%`;
+            if (localProgressThumb) localProgressThumb.style.left = `${pct}%`;
+            if (localTimeDisplay) {
+                localTimeDisplay.textContent = `${formatTime(current)} / ${formatTime(duration)}`;
+            }
+        });
+
+        localVideo.addEventListener('progress', () => {
+            if (localVideo.buffered.length > 0 && localVideo.duration > 0) {
+                const bufferedEnd = localVideo.buffered.end(localVideo.buffered.length - 1);
+                const pct = (bufferedEnd / localVideo.duration) * 100;
+                if (localBufferedBar) localBufferedBar.style.width = `${pct}%`;
+            }
+        });
+
+        localVideo.addEventListener('play', () => updatePlayPauseIcons(true));
+        localVideo.addEventListener('pause', () => updatePlayPauseIcons(false));
+        localVideo.addEventListener('ended', () => {
+            updatePlayPauseIcons(false);
+            if (localActivePlayer) localActivePlayer.classList.remove('controls-faded');
+        });
+    }
+
+    // Scrubber interaction
+    function handleScrub(e) {
+        if (!localVideo || !localProgressWrap || !localVideo.duration) return;
+        const rect = localProgressWrap.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        if (localCurrentBar) localCurrentBar.style.width = `${pct * 100}%`;
+        if (localProgressThumb) localProgressThumb.style.left = `${pct * 100}%`;
+        localVideo.currentTime = pct * localVideo.duration;
+    }
+
+    if (localProgressWrap) {
+        localProgressWrap.addEventListener('touchstart', (e) => {
+            isScrubbing = true;
+            handleScrub(e);
+        }, { passive: true });
+        window.addEventListener('touchmove', (e) => {
+            if (isScrubbing) handleScrub(e);
+        }, { passive: true });
+        window.addEventListener('touchend', () => {
+            if (isScrubbing) {
+                isScrubbing = false;
+                pingLocalControls();
+            }
+        });
+
+        localProgressWrap.addEventListener('mousedown', (e) => {
+            isScrubbing = true;
+            handleScrub(e);
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (isScrubbing) handleScrub(e);
+        });
+        window.addEventListener('mouseup', () => {
+            if (isScrubbing) {
+                isScrubbing = false;
+                pingLocalControls();
+            }
+        });
+    }
+
+    // Center & Mini play/pause
+    if (localBtnPlayPause) localBtnPlayPause.addEventListener('click', toggleLocalPlayPause);
+    if (localBtnPlayPauseMini) localBtnPlayPauseMini.addEventListener('click', toggleLocalPlayPause);
+    if (localBtnRewind) localBtnRewind.addEventListener('click', () => seekLocal(-10));
+    if (localBtnForward) localBtnForward.addEventListener('click', () => seekLocal(10));
+
+    // Surface Tap & Double Tap Gestures
+    let lastTapTime = 0;
+    if (localVideoSurface) {
+        localVideoSurface.addEventListener('click', (e) => {
+            const now = Date.now();
+            const rect = localVideoSurface.getBoundingClientRect();
+            const tapX = e.clientX - rect.left;
+            const width = rect.width;
+
+            if (now - lastTapTime < 320) {
+                // Double tap
+                if (tapX < width * 0.4) {
+                    seekLocal(-10);
+                } else if (tapX > width * 0.6) {
+                    seekLocal(10);
+                } else {
+                    toggleLocalPlayPause();
+                }
+                lastTapTime = 0;
+            } else {
+                lastTapTime = now;
+                setTimeout(() => {
+                    if (lastTapTime === now) {
+                        // Single tap: toggle controls
+                        if (localActivePlayer && localActivePlayer.classList.contains('controls-faded')) {
+                            pingLocalControls();
+                        } else if (localActivePlayer) {
+                            localActivePlayer.classList.add('controls-faded');
+                        }
+                    }
+                }, 320);
+            }
+        });
+    }
+
+    // Speed button
+    if (localBtnSpeed) {
+        localBtnSpeed.addEventListener('click', () => {
+            localSpeedIdx = (localSpeedIdx + 1) % localSpeeds.length;
+            const speed = localSpeeds[localSpeedIdx];
+            if (localVideo) localVideo.playbackRate = speed;
+            if (localSpeedText) localSpeedText.textContent = `${speed}x`;
+            showToast(`Playback Speed: ${speed}x`);
+            pingLocalControls();
+        });
+    }
+
+    // Aspect Ratio toggle
+    if (localBtnAspect) {
+        localBtnAspect.addEventListener('click', () => {
+            localAspectMode = (localAspectMode + 1) % 3;
+            if (localActivePlayer) {
+                localActivePlayer.classList.remove('zoom-fill', 'zoom-stretch');
+                if (localAspectMode === 1) {
+                    localActivePlayer.classList.add('zoom-fill');
+                    showToast('Aspect Ratio: Fill (Crop to screen)');
+                } else if (localAspectMode === 2) {
+                    localActivePlayer.classList.add('zoom-stretch');
+                    showToast('Aspect Ratio: 16:9 Stretch');
+                } else {
+                    showToast('Aspect Ratio: Fit 16:9 (Original)');
+                }
+            }
+            pingLocalControls();
+        });
+    }
+
+    // Fullscreen button
+    if (localBtnFullscreen) {
+        localBtnFullscreen.addEventListener('click', () => {
+            toggleFullscreenMode();
+            pingLocalControls();
+        });
+    }
+
+    // Choose Local MKV / Video File
+    if (btnChooseLocalFile && localFileInput) {
+        btnChooseLocalFile.addEventListener('click', () => {
+            localFileInput.click();
+        });
+        localFileInput.addEventListener('change', () => {
+            const file = localFileInput.files[0];
+            if (!file) return;
+            const objectUrl = URL.createObjectURL(file);
+            loadLocalVideo(objectUrl, file.name);
+        });
+    }
+
+    // Direct Stream URL
+    if (btnPlayStreamUrl && localStreamUrlInput) {
+        btnPlayStreamUrl.addEventListener('click', () => {
+            const url = localStreamUrlInput.value.trim();
+            if (url) {
+                loadLocalVideo(url, 'Online Video / MKV');
+            } else {
+                showToast('Please enter a valid video stream URL');
+            }
+        });
+        localStreamUrlInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') btnPlayStreamUrl.click();
+        });
+    }
+
+    // Play Demo Clip
+    if (btnPlayDemoClip) {
+        btnPlayDemoClip.addEventListener('click', () => {
+            const demoUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+            loadLocalVideo(demoUrl, 'Demo HD Clip (Multi-Audio Test)');
+        });
+    }
+
+    // Change File
+    if (btnLocalChangeFile) {
+        btnLocalChangeFile.addEventListener('click', () => {
+            if (localVideo) {
+                localVideo.pause();
+                localVideo.src = '';
+            }
+            if (localActivePlayer) localActivePlayer.style.display = 'none';
+            if (localPickerHub) localPickerHub.style.display = 'flex';
+            showToast('Choose a new MKV or Video file');
+        });
+    }
+
+    // Open External Player from Local
+    if (btnLocalExternal) {
+        btnLocalExternal.addEventListener('click', openExternalPlayerModal);
+    }
+
+    // Drawers (Audio Tracks & Subtitles)
+    function closeDrawers() {
+        if (localAudioDrawer) localAudioDrawer.classList.remove('active');
+        if (localSubtitlesDrawer) localSubtitlesDrawer.classList.remove('active');
+    }
+
+    function updateAudioTracksList() {
+        if (!localAudioTrackList) return;
+        localAudioTrackList.innerHTML = '';
+
+        // Browser native audioTracks
+        const tracks = localVideo ? localVideo.audioTracks : null;
+        if (tracks && tracks.length > 1) {
+            for (let i = 0; i < tracks.length; i++) {
+                const track = tracks[i];
+                const item = document.createElement('div');
+                item.className = `local-track-item ${track.enabled ? 'active' : ''}`;
+                const label = track.label || (track.language ? track.language.toUpperCase() : `Audio Track ${i + 1}`);
+                item.innerHTML = `
+                    <div class="local-track-item-left">
+                        <i class="fas fa-headphones"></i>
+                        <span>${escapeHtml(label)}</span>
+                    </div>
+                    <span class="local-track-badge">${track.enabled ? 'ACTIVE' : 'SELECT'}</span>
+                `;
+                item.addEventListener('click', () => {
+                    for (let j = 0; j < tracks.length; j++) {
+                        tracks[j].enabled = (j === i);
+                    }
+                    if (localAudioBadge) localAudioBadge.textContent = label.substring(0, 6);
+                    showToast(`Audio Track: ${label}`);
+                    closeDrawers();
+                    updateAudioTracksList();
+                });
+                localAudioTrackList.appendChild(item);
+            }
+        }
+
+        // Multi-Audio & Dual Audio Presets
+        const presets = [
+            { id: 'stereo', name: 'Original Stereo (All Channels)', desc: 'Standard', pan: 0, boost: 1.0 },
+            { id: 'hindi-left', name: '🇮🇳 Hindi Dubbed (Left Channel)', desc: 'Dual Left', pan: -0.9, boost: 1.2 },
+            { id: 'eng-right', name: '🇺🇸 English Audio (Right Channel)', desc: 'Dual Right', pan: 0.9, boost: 1.2 },
+            { id: 'vocal-boost', name: '🔊 Dialogue & Vocal Booster', desc: 'Clear Voice', pan: 0, boost: 2.0 }
+        ];
+
+        presets.forEach((p, idx) => {
+            const item = document.createElement('div');
+            item.className = `local-track-item ${activeAudioTrackIndex === idx ? 'active' : ''}`;
+            item.innerHTML = `
+                <div class="local-track-item-left">
+                    <i class="fas fa-sliders"></i>
+                    <span>${p.name}</span>
+                </div>
+                <span class="local-track-badge">${p.desc}</span>
+            `;
+            item.addEventListener('click', () => {
+                initWebAudio();
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                if (audioPanner) {
+                    audioPanner.pan.value = p.pan;
+                }
+                if (audioGain) {
+                    audioGain.gain.value = p.boost;
+                }
+                activeAudioTrackIndex = idx;
+                if (localAudioBadge) {
+                    localAudioBadge.textContent = idx === 1 ? 'Hindi' : (idx === 2 ? 'Eng' : 'Audio');
+                }
+                showToast(`Audio: ${p.name}`);
+                closeDrawers();
+                updateAudioTracksList();
+            });
+            localAudioTrackList.appendChild(item);
+        });
+    }
+
+    function srtToVtt(srtText) {
+        return 'WEBVTT\n\n' + srtText
+            .replace(/\r\n|\r/g, '\n')
+            .replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, '$1.$2');
+    }
+
+    function updateSubtitlesList() {
+        if (!localSubtitleList || !localVideo) return;
+        localSubtitleList.innerHTML = '';
+
+        const hasActiveTracks = Array.from(localVideo.textTracks || []).some(t => t.mode === 'showing');
+        const offItem = document.createElement('div');
+        offItem.className = `local-track-item ${!hasActiveTracks ? 'active' : ''}`;
+        offItem.innerHTML = `
+            <div class="local-track-item-left">
+                <i class="fas fa-ban"></i>
+                <span>Subtitles Off</span>
+            </div>
+            <span class="local-track-badge">${!hasActiveTracks ? 'ACTIVE' : 'OFF'}</span>
+        `;
+        offItem.addEventListener('click', () => {
+            Array.from(localVideo.textTracks || []).forEach(t => t.mode = 'disabled');
+            if (localSubBadge) localSubBadge.textContent = 'CC';
+            showToast('Subtitles Disabled');
+            closeDrawers();
+            updateSubtitlesList();
+        });
+        localSubtitleList.appendChild(offItem);
+
+        Array.from(localVideo.textTracks || []).forEach((t, i) => {
+            const item = document.createElement('div');
+            item.className = `local-track-item ${t.mode === 'showing' ? 'active' : ''}`;
+            const label = t.label || t.language || `Track ${i + 1}`;
+            item.innerHTML = `
+                <div class="local-track-item-left">
+                    <i class="fas fa-closed-captioning"></i>
+                    <span>${escapeHtml(label)}</span>
+                </div>
+                <span class="local-track-badge">${t.mode === 'showing' ? 'ACTIVE' : 'SELECT'}</span>
+            `;
+            item.addEventListener('click', () => {
+                Array.from(localVideo.textTracks).forEach(trk => trk.mode = 'disabled');
+                t.mode = 'showing';
+                if (localSubBadge) localSubBadge.textContent = 'ON';
+                showToast(`Subtitles: ${label}`);
+                closeDrawers();
+                updateSubtitlesList();
+            });
+            localSubtitleList.appendChild(item);
+        });
+    }
+
+    if (localBtnAudioTrack) {
+        localBtnAudioTrack.addEventListener('click', () => {
+            closeDrawers();
+            updateAudioTracksList();
+            if (localAudioDrawer) localAudioDrawer.classList.add('active');
+            pingLocalControls();
+        });
+    }
+    if (btnAudioDrawerClose) btnAudioDrawerClose.addEventListener('click', closeDrawers);
+
+    if (localBtnSubtitles) {
+        localBtnSubtitles.addEventListener('click', () => {
+            closeDrawers();
+            updateSubtitlesList();
+            if (localSubtitlesDrawer) localSubtitlesDrawer.classList.add('active');
+            pingLocalControls();
+        });
+    }
+    if (btnSubDrawerClose) btnSubDrawerClose.addEventListener('click', closeDrawers);
+
+    if (btnChooseSubFile && localSubFileInput) {
+        btnChooseSubFile.addEventListener('click', () => localSubFileInput.click());
+        localSubFileInput.addEventListener('change', () => {
+            const file = localSubFileInput.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const content = e.target.result;
+                const vtt = file.name.endsWith('.vtt') ? content : srtToVtt(content);
+                const blob = new Blob([vtt], { type: 'text/vtt' });
+                const blobUrl = URL.createObjectURL(blob);
+
+                const track = document.createElement('track');
+                track.kind = 'subtitles';
+                track.label = file.name.replace(/\.[^/.]+$/, '');
+                track.srclang = 'hi';
+                track.src = blobUrl;
+                track.default = true;
+                if (localVideo) localVideo.appendChild(track);
+
+                setTimeout(() => {
+                    if (localVideo && localVideo.textTracks) {
+                        for (let i = 0; i < localVideo.textTracks.length; i++) {
+                            localVideo.textTracks[i].mode = (i === localVideo.textTracks.length - 1) ? 'showing' : 'disabled';
+                        }
+                    }
+                    if (localSubBadge) localSubBadge.textContent = 'ON';
+                    showToast(`✅ Subtitles Loaded: ${file.name}`);
+                    closeDrawers();
+                    updateSubtitlesList();
+                }, 200);
+            };
+            reader.readAsText(file);
         });
     }
 

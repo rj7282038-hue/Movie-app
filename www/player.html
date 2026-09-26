@@ -59,6 +59,177 @@
                     referrerpolicy="no-referrer">
                 </iframe>
 
+                <!-- In-App MKV & Multi-Lang Video Player Engine -->
+                <div class="local-player-container" id="localPlayerContainer" style="display: none;">
+                    
+                    <!-- State A: MKV File Picker & Stream Launcher Hub -->
+                    <div class="local-picker-hub" id="localPickerHub">
+                        <div class="hub-glass-card">
+                            <div class="hub-header">
+                                <div class="hub-icon-wrapper">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                                <div class="hub-title-box">
+                                    <h2 class="hub-title">EPIC MKV Player</h2>
+                                    <span class="hub-subtitle">Hardware Engine • Dual Audio • Subtitles</span>
+                                </div>
+                            </div>
+
+                            <div class="hub-badges-row">
+                                <span class="hub-badge"><i class="fas fa-film"></i> MKV / MP4 / WEBM</span>
+                                <span class="hub-badge"><i class="fas fa-headphones"></i> Dual-Audio (Hindi + Eng)</span>
+                                <span class="hub-badge"><i class="fas fa-closed-captioning"></i> Subtitles (.SRT)</span>
+                            </div>
+
+                            <!-- File Selection Action -->
+                            <div class="hub-action-section">
+                                <input type="file" id="localFileInput" accept="video/x-matroska,video/mkv,.mkv,video/mp4,.mp4,video/webm,.webm,video/*,.avi,.ts,.m4v" style="display: none;">
+                                <button class="hub-primary-btn" id="btnChooseLocalFile">
+                                    <i class="fas fa-folder-open"></i>
+                                    <span>Select MKV / Video from Phone</span>
+                                </button>
+                            </div>
+
+                            <!-- Or Paste Stream URL -->
+                            <div class="hub-url-row">
+                                <div class="hub-url-input-wrap">
+                                    <i class="fas fa-link hub-url-icon"></i>
+                                    <input type="text" id="localStreamUrlInput" class="hub-url-input" placeholder="Or paste direct .mkv / .mp4 URL...">
+                                </div>
+                                <button class="hub-url-play-btn" id="btnPlayStreamUrl" title="Play Link">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            </div>
+
+                            <!-- Demo Sample & Quick Help Footer -->
+                            <div class="hub-footer-row">
+                                <button class="hub-text-btn" id="btnPlayDemoClip">
+                                    <i class="fas fa-wand-magic-sparkles"></i> Play Demo Clip
+                                </button>
+                                <span class="hub-tip-text">
+                                    <i class="fas fa-circle-check" style="color: #00e5ff;"></i> Multi-Audio Track Switching
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- State B: Active In-App MKV / Video Player with Custom Cinema Controls -->
+                    <div class="local-active-player" id="localActivePlayer" style="display: none;">
+                        <video id="localVideoElement" playsinline webkit-playsinline preload="metadata"></video>
+
+                        <!-- Gesture / Tap Surface -->
+                        <div class="local-video-surface" id="localVideoSurface"></div>
+
+                        <!-- Top Floating Info & Action Bar -->
+                        <div class="local-ctrl-top" id="localCtrlTop">
+                            <div class="local-file-meta">
+                                <span class="local-playing-badge"><i class="fas fa-circle-play"></i> LOCAL MKV</span>
+                                <span class="local-playing-title" id="localPlayingTitle">Playing Video</span>
+                            </div>
+                            <div class="local-top-actions">
+                                <button class="local-top-btn" id="btnLocalChangeFile" title="Change Video">
+                                    <i class="fas fa-folder-open"></i> <span>Open</span>
+                                </button>
+                                <button class="local-top-btn" id="btnLocalExternal" title="Open in MX / VLC">
+                                    <i class="fas fa-external-link-alt"></i> <span>MX/VLC</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Center Play/Pause & Seek Gestures -->
+                        <div class="local-ctrl-center" id="localCtrlCenter">
+                            <button class="center-gesture-btn" id="localBtnRewind" aria-label="Rewind 10s">
+                                <i class="fas fa-rotate-left"></i>
+                                <span>10s</span>
+                            </button>
+                            <button class="center-play-btn" id="localBtnPlayPause" aria-label="Play / Pause">
+                                <i class="fas fa-play" id="localPlayIcon"></i>
+                            </button>
+                            <button class="center-gesture-btn" id="localBtnForward" aria-label="Forward 10s">
+                                <i class="fas fa-rotate-right"></i>
+                                <span>10s</span>
+                            </button>
+                        </div>
+
+                        <!-- Bottom Control Bar -->
+                        <div class="local-ctrl-bottom" id="localCtrlBottom">
+                            <!-- Progress Bar Container -->
+                            <div class="local-progress-wrap" id="localProgressWrap">
+                                <div class="local-progress-bar">
+                                    <div class="local-progress-buffered" id="localBufferedBar"></div>
+                                    <div class="local-progress-current" id="localCurrentBar"></div>
+                                    <div class="local-progress-thumb" id="localProgressThumb"></div>
+                                </div>
+                            </div>
+
+                            <!-- Controls Row -->
+                            <div class="local-bottom-row">
+                                <div class="local-bottom-left">
+                                    <button class="bottom-ctrl-btn" id="localBtnPlayPauseMini" aria-label="Play / Pause">
+                                        <i class="fas fa-play" id="localMiniPlayIcon"></i>
+                                    </button>
+                                    <span class="local-time-text" id="localTimeDisplay">00:00 / 00:00</span>
+                                </div>
+
+                                <div class="local-bottom-right">
+                                    <!-- Audio Track Switcher Button -->
+                                    <button class="bottom-ctrl-btn" id="localBtnAudioTrack" title="Change Audio Track">
+                                        <i class="fas fa-headphones"></i>
+                                        <span class="ctrl-btn-badge" id="localAudioBadge">Audio</span>
+                                    </button>
+
+                                    <!-- Subtitle Picker Button -->
+                                    <button class="bottom-ctrl-btn" id="localBtnSubtitles" title="Subtitles">
+                                        <i class="fas fa-closed-captioning"></i>
+                                        <span class="ctrl-btn-badge" id="localSubBadge">CC</span>
+                                    </button>
+
+                                    <!-- Speed Selector -->
+                                    <button class="bottom-ctrl-btn" id="localBtnSpeed" title="Speed">
+                                        <span id="localSpeedText">1.0x</span>
+                                    </button>
+
+                                    <!-- Aspect Ratio Toggle -->
+                                    <button class="bottom-ctrl-btn" id="localBtnAspect" title="Aspect Ratio">
+                                        <i class="fas fa-maximize"></i>
+                                    </button>
+
+                                    <!-- Fullscreen Toggle -->
+                                    <button class="bottom-ctrl-btn" id="localBtnFullscreen" title="Fullscreen">
+                                        <i class="fas fa-expand" id="localFullscreenIcon"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Audio Tracks Selection Drawer -->
+                        <div class="local-drawer" id="localAudioDrawer">
+                            <div class="local-drawer-header">
+                                <span><i class="fas fa-headphones"></i> Audio Tracks & Channels</span>
+                                <button class="local-drawer-close" id="btnAudioDrawerClose"><i class="fas fa-times"></i></button>
+                            </div>
+                            <div class="local-drawer-body" id="localAudioTrackList">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Subtitles Drawer / Picker -->
+                        <div class="local-drawer" id="localSubtitlesDrawer">
+                            <div class="local-drawer-header">
+                                <span><i class="fas fa-closed-captioning"></i> Subtitles (.SRT / .VTT)</span>
+                                <button class="local-drawer-close" id="btnSubDrawerClose"><i class="fas fa-times"></i></button>
+                            </div>
+                            <div class="local-drawer-body" id="localSubtitleList">
+                                <!-- Populated dynamically -->
+                            </div>
+                            <input type="file" id="localSubFileInput" accept=".srt,.vtt" style="display:none;">
+                            <button class="local-drawer-sub-btn" id="btnChooseSubFile">
+                                <i class="fas fa-plus"></i> Load External Subtitle File (.srt)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Floating Landscape / Fullscreen Controls Overlay -->
                 <div class="landscape-floating-controls" id="landscapeControls">
                     <button class="cinema-ctrl-btn" id="btnExitFullscreen" aria-label="Exit Fullscreen">
@@ -103,6 +274,9 @@
                 </button>
                 <button class="server-pill" data-server="6">
                     <span class="dot"></span> 🎬 AutoEmbed (Multi-Audio)
+                </button>
+                <button class="server-pill server-pill-local" data-server="local">
+                    <span class="dot dot-local"></span> 📁 Local (Multi-Lang)
                 </button>
             </div>
         </div>
@@ -208,6 +382,7 @@
                     <option value="4">🌍 Server 4: SuperEmbed (Global Dubs)</option>
                     <option value="5">🚀 Server 5: Embed.su (Multi-Stream)</option>
                     <option value="6">🎬 Server 6: AutoEmbed (Multi-Audio)</option>
+                    <option value="local">📁 Local: In-App MKV / Multi-Lang Player</option>
                 </select>
             </div>
 
