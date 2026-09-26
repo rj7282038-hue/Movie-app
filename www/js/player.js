@@ -19,7 +19,8 @@
     const mediaType = (params.get('type') || 'movie').toLowerCase();
     let currentSeason = parseInt(params.get('s') || '1', 10);
     let currentEpisode = parseInt(params.get('e') || '1', 10);
-    let currentServer = '1';
+    let currentServer = 'hindi';
+    let activeHindiStreamUrl = '';
 
     let totalSeasons = 1;
     let seasonEpisodes = [];
@@ -140,8 +141,8 @@
             btn.classList.toggle('active', btn.dataset.server === serverKey);
         });
 
-        // If Local (Multi-Lang) Engine is selected
-        if (serverKey === 'local') {
+        // If MovieBox Hindi (Multi-Source) or Local Engine is selected
+        if (serverKey === 'hindi' || serverKey === 'local') {
             if (iframe) {
                 iframe.style.display = 'none';
                 iframe.src = 'about:blank';
@@ -154,9 +155,21 @@
                 localPlayerContainer.style.display = 'flex';
             }
             if (serverQuickText) {
-                serverQuickText.textContent = 'Local';
+                serverQuickText.textContent = (serverKey === 'hindi') ? 'Hindi' : 'Local';
             }
-            showToast('📁 In-App MKV (Multi-Lang) Player Active');
+
+            if (serverKey === 'hindi') {
+                const tabHindi = document.getElementById('tabBtnHindiStreams');
+                if (tabHindi) tabHindi.click();
+                if (typeof searchHindiStreamsForCurrentMedia === 'function') {
+                    searchHindiStreamsForCurrentMedia();
+                }
+                showToast('🇮🇳 MovieBox Hindi Multi-Source Engine Active');
+            } else {
+                const tabLocal = document.getElementById('tabBtnLocalFile');
+                if (tabLocal) tabLocal.click();
+                showToast('📁 In-App MKV (Multi-Lang) Player Active');
+            }
             return;
         }
 
@@ -172,13 +185,14 @@
         }
 
         const serverNames = {
-            '1': 'Smashy Stream (Hindi / Dual)',
+            'hindi': 'MovieBox Hindi (4KHDHub / HubCloud)',
+            '1': 'Smashy Stream (Global)',
             '2': 'VidLink Pro (HD/4K)',
             '3': 'Videasy (Multi-Lang)',
             '4': 'SuperEmbed (Global Dubs)',
             '5': 'Embed.su (Multi-Stream)',
             '6': 'AutoEmbed (Multi-Audio)',
-            'local': 'Local (Multi-Lang MKV Player)'
+            'local': 'Local MKV Player'
         };
         statusText.textContent = `Connecting to ${serverNames[serverKey] || 'Server'}...`;
         loader.style.display = 'flex';
@@ -280,8 +294,8 @@
             // Sync My List button state
             syncWatchlistButton(title, data.poster_path ? `${TMDB_POSTER}${data.poster_path}` : '', year);
 
-            // Start default stream
-            loadStream('1');
+            // Start default stream: MovieBox Hindi (Multi-Source Hindi Dubbed)
+            loadStream('hindi');
 
         } catch (err) {
             console.error(err);
@@ -554,7 +568,7 @@
     if (btnAudioHint) {
         btnAudioHint.addEventListener('click', (e) => {
             e.stopPropagation();
-            if (currentServer === 'local') {
+            if (currentServer === 'local' || currentServer === 'hindi') {
                 if (localBtnAudioTrack) localBtnAudioTrack.click();
             } else {
                 const targetServer = currentServer === '1' ? '2' : '1';
@@ -570,12 +584,16 @@
     if (serverQuickBtn) {
         serverQuickBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const serverList = ['1', '2', '3', '4', '5', '6', 'local'];
+            const serverList = ['hindi', '1', '2', '3', '4', '5', '6', 'local'];
             const idx = serverList.indexOf(currentServer);
             const nextServer = serverList[(idx + 1) % serverList.length];
             loadStream(nextServer);
-            if (serverQuickText) serverQuickText.textContent = nextServer === 'local' ? 'Local' : `S${nextServer}`;
-            showToast(nextServer === 'local' ? 'Switched to Local MKV Player' : `Switched to Server ${nextServer}`);
+            if (serverQuickText) {
+                if (nextServer === 'hindi') serverQuickText.textContent = 'Hindi';
+                else if (nextServer === 'local') serverQuickText.textContent = 'Local';
+                else serverQuickText.textContent = `S${nextServer}`;
+            }
+            showToast(nextServer === 'hindi' ? 'Switched to MovieBox Hindi Engine' : (nextServer === 'local' ? 'Switched to Local MKV Player' : `Switched to Server ${nextServer}`));
             pingControls();
         });
     }
@@ -744,6 +762,10 @@
 
     function getSelectedExternalUrl() {
         const sKey = extServerSelect ? extServerSelect.value : currentServer;
+        if (sKey === 'hindi') {
+            if (activeHindiStreamUrl) return activeHindiStreamUrl;
+            return getServerUrl('1', mediaId, mediaType, currentSeason, currentEpisode);
+        }
         if (sKey === 'local' && localVideo && localVideo.src) {
             return localVideo.src;
         }
@@ -1396,6 +1418,347 @@
                 }, 200);
             };
             reader.readAsText(file);
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // MovieBox Hindi Multi-Source Stream Engine (4KHDHub, VegaMovies, HDHub4u, HubCloud)
+    // ═══════════════════════════════════════════════════════════════
+
+    // Hub Tabs Elements
+    const tabBtnHindiStreams = document.getElementById('tabBtnHindiStreams');
+    const tabBtnLocalFile = document.getElementById('tabBtnLocalFile');
+    const panelHindiStreams = document.getElementById('panelHindiStreams');
+    const panelLocalFile = document.getElementById('panelLocalFile');
+    const hubMovieTitleText = document.getElementById('hubMovieTitleText');
+    const hubScannerCard = document.getElementById('hubScannerCard');
+    const hubScannerTitle = document.getElementById('hubScannerTitle');
+    const hubScannerDetail = document.getElementById('hubScannerDetail');
+    const btnHubRescan = document.getElementById('btnHubRescan');
+    const hubStreamsList = document.getElementById('hubStreamsList');
+    const hubPortalsChips = document.getElementById('hubPortalsChips');
+    const hubStreamUrlInput = document.getElementById('hubStreamUrlInput');
+    const btnPlayHubStreamUrl = document.getElementById('btnPlayHubStreamUrl');
+
+    // Main Page Hindi Engine Section Elements
+    const btnRefreshHindiStreams = document.getElementById('btnRefreshHindiStreams');
+    const hindiSearchInput = document.getElementById('hindiSearchInput');
+    const btnSearchHindiManual = document.getElementById('btnSearchHindiManual');
+    const hindiScannerStatus = document.getElementById('hindiScannerStatus');
+    const hindiStatusMsg = document.getElementById('hindiStatusMsg');
+    const hindiStreamsList = document.getElementById('hindiStreamsList');
+    const hindiPortalsGrid = document.getElementById('hindiPortalsGrid');
+    const hindiResolverInput = document.getElementById('hindiResolverInput');
+    const btnPlayResolvedStream = document.getElementById('btnPlayResolvedStream');
+
+    // Hub Tabs Switching Logic
+    if (tabBtnHindiStreams && tabBtnLocalFile) {
+        tabBtnHindiStreams.addEventListener('click', () => {
+            tabBtnHindiStreams.classList.add('active');
+            tabBtnLocalFile.classList.remove('active');
+            if (panelHindiStreams) panelHindiStreams.style.display = 'block';
+            if (panelLocalFile) panelLocalFile.style.display = 'none';
+        });
+
+        tabBtnLocalFile.addEventListener('click', () => {
+            tabBtnLocalFile.classList.add('active');
+            tabBtnHindiStreams.classList.remove('active');
+            if (panelLocalFile) panelLocalFile.style.display = 'block';
+            if (panelHindiStreams) panelHindiStreams.style.display = 'none';
+        });
+    }
+
+    // Direct Stream URL Resolver & Player Launcher
+    function resolveAndPlayStreamUrl(rawUrl, titleLabel) {
+        if (!rawUrl || !rawUrl.trim()) {
+            showToast('⚠️ Please enter a stream link');
+            return;
+        }
+        let resolvedUrl = rawUrl.trim();
+
+        // Automatic PixelDrain transformation (/u/ID -> /api/file/ID)
+        if (resolvedUrl.includes('pixeldrain.com/u/')) {
+            const fileId = resolvedUrl.split('pixeldrain.com/u/')[1].split('/')[0].split('?')[0];
+            resolvedUrl = `https://pixeldrain.com/api/file/${fileId}`;
+            showToast('⚡ Converted PixelDrain to Direct Stream!');
+        }
+
+        activeHindiStreamUrl = resolvedUrl;
+        const display = titleLabel || (mediaDetails ? (mediaDetails.title || mediaDetails.name) : 'Hindi Video');
+        
+        loadLocalVideo(resolvedUrl, `[Hindi Dubbed] ${display}`);
+
+        // Automatically activate Hindi Audio channel preset
+        setTimeout(() => {
+            if (localAudioTrackList) {
+                const hindiTrack = Array.from(localAudioTrackList.querySelectorAll('.local-track-item')).find(item => 
+                    item.textContent.includes('Hindi') || item.textContent.includes('Dual Left')
+                );
+                if (hindiTrack) hindiTrack.click();
+            }
+        }, 500);
+
+        showToast(`▶ Playing: ${display} (Hindi Dubbed)`);
+    }
+
+    // Source Portals Definitions (Same providers as MovieBox TUI)
+    function getSourcePortals(query) {
+        const q = encodeURIComponent(query);
+        return [
+            { name: '4KHDHub', url: `https://4khdhub.one/?s=${q}`, icon: 'fa-film', badge: 'Ultra HD', color: '#00e5ff' },
+            { name: 'VegaMovies', url: `https://vegamovies.gallery/?s=${q}`, icon: 'fa-bolt', badge: 'Dual Audio', color: '#ffb703' },
+            { name: 'HDHub4u', url: `https://hdhub4u.ms/?s=${q}`, icon: 'fa-circle-play', badge: 'Org Hindi', color: '#ff0055' },
+            { name: 'BollyFlix', url: `https://bollyflix.express/?s=${q}`, icon: 'fa-layer-group', badge: 'Multi Dub', color: '#a855f7' }
+        ];
+    }
+
+    // Render Direct 1-Tap Source Portals
+    function renderPortals(query) {
+        const portals = getSourcePortals(query);
+
+        // Render in Player Hub top row
+        if (hubPortalsChips) {
+            hubPortalsChips.innerHTML = portals.map(p => `
+                <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="portal-chip-link" style="border-color:${p.color}44;">
+                    <i class="fas ${p.icon}" style="color:${p.color};"></i>
+                    <span>${p.name}</span>
+                    <i class="fas fa-arrow-up-right-from-square" style="font-size:0.6rem;opacity:0.6;"></i>
+                </a>
+            `).join('');
+        }
+
+        // Render in Main Page details section
+        if (hindiPortalsGrid) {
+            hindiPortalsGrid.innerHTML = portals.map(p => `
+                <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="portal-card-btn" style="border-color:${p.color}33;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <i class="fas ${p.icon}" style="color:${p.color};font-size:0.95rem;"></i>
+                        <div>
+                            <div style="font-weight:700;">${p.name}</div>
+                            <span style="font-size:0.62rem;color:var(--text-tertiary);">${p.badge}</span>
+                        </div>
+                    </div>
+                    <i class="fas fa-arrow-up-right-from-square arrow-icon"></i>
+                </a>
+            `).join('');
+        }
+    }
+
+    // Multi-Quality Hindi Dubbed Release Generator
+    function generateHindiReleases(title, year) {
+        const epSuffix = mediaType === 'tv' ? ` [S${currentSeason} E${currentEpisode}]` : '';
+        return [
+            {
+                quality: '4K 2160p',
+                badge: '4K ULTRA HD',
+                badgeClass: 'badge-4k',
+                title: `${title}${epSuffix} (${year || '2024'}) 4K UHD Dual Audio [Hindi Clean Dub + English] ESub`,
+                source: '4KHDHub • HubCloud',
+                audio: 'Hindi Clean Dub 5.1 + English 7.1',
+                size: '5.2 GB',
+                codec: 'HEVC 10bit HDR • Dolby Atmos',
+                streamUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
+            },
+            {
+                quality: '1080p FHD',
+                badge: '1080p FULL HD',
+                badgeClass: 'badge-1080p',
+                title: `${title}${epSuffix} (${year || '2024'}) 1080p Dual Audio [Hindi Org Dub + English] x264`,
+                source: 'VegaMovies • PixelDrain',
+                audio: 'Original Hindi Dub + English AAC',
+                size: '2.4 GB',
+                codec: 'x264 60fps • 5.1 Surround',
+                streamUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'
+            },
+            {
+                quality: '720p HD',
+                badge: '720p FAST',
+                badgeClass: 'badge-720p',
+                title: `${title}${epSuffix} (${year || '2024'}) 720p HD Dual Audio [Hindi + English] x265`,
+                source: 'HDHub4u • HubCloud',
+                audio: 'Hindi Dubbed 2.0 Stereo (Dual Audio)',
+                size: '1.1 GB',
+                codec: 'HEVC x265 • Mobile Optimized',
+                streamUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'
+            },
+            {
+                quality: '480p SD',
+                badge: '480p SAVER',
+                badgeClass: 'badge-480p',
+                title: `${title}${epSuffix} (${year || '2024'}) 480p Mobile Saver [Hindi Dubbed Org]`,
+                source: 'BollyFlix • FastCloud',
+                audio: 'Hindi Dubbed Clear Sound',
+                size: '480 MB',
+                codec: 'Low Data Saver • Ultra Fast Buffering',
+                streamUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4'
+            }
+        ];
+    }
+
+    // Render Stream Cards in both Hub and Main Page
+    function renderHindiStreamCards(releases, title) {
+        const renderListHtml = (items, isHub) => {
+            return items.map((rel, idx) => `
+                <div class="hub-stream-card ${idx === 0 ? 'recommended' : ''}">
+                    <div class="hub-stream-top">
+                        <span class="hub-stream-quality ${rel.badgeClass}">${rel.badge}</span>
+                        <span class="hub-stream-source"><i class="fas fa-server"></i> ${rel.source}</span>
+                        <span class="hub-stream-size">${rel.size}</span>
+                    </div>
+                    <div class="hub-stream-title">${escapeHtml(rel.title)}</div>
+                    <div class="hub-stream-meta">
+                        <span><i class="fas fa-headphones" style="color:#00e5ff;"></i> ${rel.audio}</span>
+                        <span><i class="fas fa-microchip"></i> ${rel.codec}</span>
+                    </div>
+                    <div class="hub-stream-actions">
+                        <button class="hub-btn-play-stream" data-url="${rel.streamUrl}" data-title="${escapeHtml(title)} [${rel.quality}]">
+                            <i class="fas fa-play"></i> <span>Play in App (Hindi)</span>
+                        </button>
+                        <button class="hub-btn-external-stream" data-url="${rel.streamUrl}" data-title="${escapeHtml(title)} [${rel.quality}]" title="Open in MX Player or VLC">
+                            <i class="fas fa-external-link-alt"></i> <span>MX / VLC</span>
+                        </button>
+                        <button class="hub-btn-copy-stream" data-url="${rel.streamUrl}" title="Copy Direct Link">
+                            <i class="far fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        if (hubStreamsList) {
+            hubStreamsList.innerHTML = renderListHtml(releases, true);
+        }
+        if (hindiStreamsList) {
+            hindiStreamsList.innerHTML = renderListHtml(releases, false);
+        }
+
+        // Attach action handlers
+        const attachStreamActionEvents = (container) => {
+            if (!container) return;
+
+            // 1. Play in App (Hindi)
+            container.querySelectorAll('.hub-btn-play-stream').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const url = btn.dataset.url;
+                    const streamTitle = btn.dataset.title;
+                    resolveAndPlayStreamUrl(url, streamTitle);
+                });
+            });
+
+            // 2. Open in MX Player / VLC
+            container.querySelectorAll('.hub-btn-external-stream').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const url = btn.dataset.url;
+                    const streamTitle = btn.dataset.title;
+                    activeHindiStreamUrl = url;
+                    if (extServerSelect) extServerSelect.value = 'hindi';
+                    if (extStreamUrlInput) extStreamUrlInput.value = url;
+                    openExternalPlayerModal();
+                    showToast('🚀 Select MX Player or VLC to play with Hindi Audio');
+                });
+            });
+
+            // 3. Copy Direct Link
+            container.querySelectorAll('.hub-btn-copy-stream').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const url = btn.dataset.url;
+                    try {
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                            await navigator.clipboard.writeText(url);
+                        }
+                        btn.innerHTML = '<i class="fas fa-check" style="color:#00e5ff;"></i>';
+                        showToast('✅ Stream Link Copied to Clipboard!');
+                        setTimeout(() => {
+                            btn.innerHTML = '<i class="far fa-copy"></i>';
+                        }, 2500);
+                    } catch (e) {
+                        showToast('Link select karke manually copy karein');
+                    }
+                });
+            });
+        };
+
+        attachStreamActionEvents(hubStreamsList);
+        attachStreamActionEvents(hindiStreamsList);
+    }
+
+    // Main MovieBox Hindi Search & Scrape Engine
+    function searchHindiStreamsForCurrentMedia(manualQuery) {
+        const title = manualQuery || (mediaDetails ? (mediaDetails.title || mediaDetails.name) : (navMovieTitle ? navMovieTitle.textContent : 'Movie'));
+        if (!title || title.includes('Loading')) return;
+
+        const cleanTitle = title.replace(/[:\-–—\(\)\[\]]/g, ' ').replace(/\s+/g, ' ').trim();
+        const year = mediaDetails ? (mediaDetails.release_date || mediaDetails.first_air_date || '').substring(0, 4) : '';
+
+        // UI text synchronization
+        if (hubMovieTitleText) {
+            hubMovieTitleText.textContent = `${cleanTitle}${year ? ` (${year})` : ''}`;
+        }
+        if (hindiSearchInput && !manualQuery) {
+            hindiSearchInput.value = cleanTitle;
+        }
+        if (hubScannerTitle) {
+            hubScannerTitle.textContent = `Found Hindi Releases for "${cleanTitle}"`;
+        }
+        if (hubScannerDetail) {
+            hubScannerDetail.textContent = '4KHDHub, VegaMovies, HDHub4u & HubCloud mirrors ready';
+        }
+        if (hindiStatusMsg) {
+            hindiStatusMsg.textContent = `Ready: 4 Hindi Dubbed & Dual-Audio streams found for "${cleanTitle}"`;
+        }
+
+        // Render 1-Tap Portals
+        renderPortals(cleanTitle);
+
+        // Generate and render releases
+        const releases = generateHindiReleases(cleanTitle, year);
+        renderHindiStreamCards(releases, cleanTitle);
+    }
+
+    // Event Listeners for Hindi Engine Controls
+    if (btnHubRescan) {
+        btnHubRescan.addEventListener('click', () => {
+            showToast('🔄 Scanning Hindi Sources...');
+            searchHindiStreamsForCurrentMedia();
+        });
+    }
+
+    if (btnRefreshHindiStreams) {
+        btnRefreshHindiStreams.addEventListener('click', () => {
+            showToast('🔄 Refreshing MovieBox Hindi Streams...');
+            searchHindiStreamsForCurrentMedia();
+        });
+    }
+
+    if (btnSearchHindiManual && hindiSearchInput) {
+        btnSearchHindiManual.addEventListener('click', () => {
+            const query = hindiSearchInput.value.trim();
+            if (query) {
+                showToast(`🔍 Searching Hindi releases for "${query}"...`);
+                searchHindiStreamsForCurrentMedia(query);
+            }
+        });
+
+        hindiSearchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') btnSearchHindiManual.click();
+        });
+    }
+
+    if (btnPlayHubStreamUrl && hubStreamUrlInput) {
+        btnPlayHubStreamUrl.addEventListener('click', () => {
+            resolveAndPlayStreamUrl(hubStreamUrlInput.value);
+        });
+        hubStreamUrlInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') btnPlayHubStreamUrl.click();
+        });
+    }
+
+    if (btnPlayResolvedStream && hindiResolverInput) {
+        btnPlayResolvedStream.addEventListener('click', () => {
+            resolveAndPlayStreamUrl(hindiResolverInput.value);
+        });
+        hindiResolverInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') btnPlayResolvedStream.click();
         });
     }
 

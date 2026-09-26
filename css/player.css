@@ -1745,3 +1745,667 @@ body.is-fullscreen .hub-glass-card {
     max-width: 580px;
     padding: 18px 24px;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   MovieBox Hindi Multi-Source Stream Engine & Hub Styling
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Server Bar Hindi Pill */
+.server-pill-hindi {
+    background: rgba(229, 9, 20, 0.22) !important;
+    border: 1px solid rgba(0, 229, 255, 0.55) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 14px rgba(0, 229, 255, 0.25);
+    font-weight: 700 !important;
+}
+
+.server-pill-hindi.active {
+    background: linear-gradient(135deg, #e50914 0%, #b80610 40%, #00b4d8 100%) !important;
+    border-color: #00e5ff !important;
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.45);
+}
+
+.dot-hindi {
+    background: #00e5ff !important;
+    box-shadow: 0 0 8px #00e5ff !important;
+}
+
+/* Hub Tabs inside Player Frame */
+.hub-tab-nav {
+    display: flex;
+    gap: 6px;
+    background: rgba(0, 0, 0, 0.45);
+    padding: 3px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hub-tab-btn {
+    flex: 1;
+    padding: 7px 10px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 0.74rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.hub-tab-btn.active {
+    background: rgba(0, 229, 255, 0.2);
+    color: #00e5ff;
+    box-shadow: 0 2px 8px rgba(0, 229, 255, 0.2);
+    border: 1px solid rgba(0, 229, 255, 0.4);
+}
+
+.hub-tab-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.hub-target-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.72rem;
+}
+
+.hub-target-badge {
+    color: #fff;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 65%;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.hub-target-badge i {
+    color: var(--primary);
+}
+
+/* Hub Scanner Card */
+.hub-scanner-card {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(0, 229, 255, 0.25);
+    border-radius: 10px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+}
+
+.hub-scanner-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(0, 229, 255, 0.2);
+    border-top-color: #00e5ff;
+    border-radius: 50%;
+    animation: hubSpin 0.75s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes hubSpin {
+    to { transform: rotate(360deg); }
+}
+
+.hub-scanner-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.hub-scanner-text strong {
+    font-size: 0.74rem;
+    color: #ffffff;
+}
+
+.hub-scanner-text span {
+    font-size: 0.64rem;
+    color: var(--text-tertiary);
+}
+
+.hub-rescan-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 6px;
+    color: #00e5ff;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.hub-rescan-btn:active {
+    transform: scale(0.9);
+}
+
+/* Streams list inside hub */
+.hub-streams-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 120px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.hub-stream-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.hub-stream-card:hover, .hub-stream-card:active {
+    border-color: #00e5ff;
+    background: rgba(0, 229, 255, 0.08);
+}
+
+.hub-stream-info {
+    flex: 1;
+    overflow: hidden;
+}
+
+.hub-stream-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hub-stream-tags {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 2px;
+}
+
+.hub-tag {
+    font-size: 0.58rem;
+    font-weight: 700;
+    padding: 1px 4px;
+    border-radius: 3px;
+    background: rgba(0, 229, 255, 0.15);
+    color: #00e5ff;
+}
+
+.hub-tag.tag-hindi {
+    background: rgba(229, 9, 20, 0.25);
+    color: #ff4d5a;
+}
+
+.hub-tag.tag-source {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+}
+
+.hub-stream-btn {
+    padding: 5px 10px;
+    background: linear-gradient(135deg, #e50914, #00b4d8);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.hub-stream-btn:active {
+    transform: scale(0.92);
+}
+
+/* Portals row */
+.hub-portals-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.65rem;
+    color: var(--text-tertiary);
+    overflow-x: auto;
+    padding: 2px 0;
+}
+
+.hub-portals-title {
+    flex-shrink: 0;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.hub-portals-chips {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.hub-portal-chip {
+    padding: 3px 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.hub-portal-chip:active {
+    background: rgba(0, 229, 255, 0.2);
+    border-color: #00e5ff;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Page Body Section: MovieBox Multi-Source Hindi Streams
+   ═══════════════════════════════════════════════════════════════ */
+.hindi-engine-section {
+    background: radial-gradient(circle at top left, rgba(229, 9, 20, 0.12) 0%, rgba(18, 20, 32, 0.95) 60%);
+    border: 1px solid rgba(0, 229, 255, 0.35);
+    border-radius: 16px;
+    padding: 16px;
+    margin: 14px 0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 229, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.hindi-engine-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.hindi-engine-title-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.hindi-flag-badge {
+    background: linear-gradient(90deg, rgba(229, 9, 20, 0.3), rgba(0, 229, 255, 0.3));
+    border: 1px solid rgba(0, 229, 255, 0.5);
+    color: #00e5ff;
+    font-size: 0.62rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    width: fit-content;
+}
+
+.hindi-engine-heading {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+    letter-spacing: 0.3px;
+}
+
+.hindi-refresh-btn {
+    background: rgba(0, 229, 255, 0.15);
+    border: 1px solid rgba(0, 229, 255, 0.4);
+    color: #00e5ff;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.2s ease;
+}
+
+.hindi-refresh-btn:active {
+    transform: scale(0.92);
+    background: rgba(0, 229, 255, 0.3);
+}
+
+.hindi-engine-subtext {
+    font-size: 0.74rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* Hindi Search Bar */
+.hindi-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hindi-search-input-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 10px;
+    padding: 8px 12px;
+    gap: 8px;
+    color: var(--text-tertiary);
+}
+
+.hindi-search-input-wrap:focus-within {
+    border-color: #00e5ff;
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.25);
+}
+
+.hindi-search-input-wrap input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-size: 0.78rem;
+    width: 100%;
+}
+
+.hindi-search-btn {
+    width: 38px;
+    height: 38px;
+    background: var(--primary);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.hindi-search-btn:active {
+    transform: scale(0.92);
+}
+
+/* Scanner Status */
+.hindi-scanner-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+}
+
+.scanner-dot-pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #00e5ff;
+    box-shadow: 0 0 8px #00e5ff;
+    animation: scannerPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes scannerPulse {
+    0%, 100% { transform: scale(0.85); opacity: 0.6; }
+    50% { transform: scale(1.3); opacity: 1; }
+}
+
+/* Main Hindi Streams List */
+.hindi-streams-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.hindi-stream-item {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.hindi-stream-item:hover {
+    background: rgba(0, 229, 255, 0.05);
+    border-color: rgba(0, 229, 255, 0.35);
+}
+
+.hindi-stream-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.hindi-stream-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.3;
+}
+
+.hindi-badges-strip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+}
+
+.badge-tag-pill {
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.badge-tag-hindi {
+    background: rgba(229, 9, 20, 0.25);
+    border: 1px solid rgba(229, 9, 20, 0.5);
+    color: #ff4d5a;
+}
+
+.badge-tag-quality {
+    background: rgba(0, 229, 255, 0.2);
+    border: 1px solid rgba(0, 229, 255, 0.4);
+    color: #00e5ff;
+}
+
+.badge-tag-host {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--text-secondary);
+}
+
+.hindi-stream-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stream-action-primary {
+    flex: 1;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #e50914 0%, #b80610 50%, #00b4d8 100%);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.74rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(229, 9, 20, 0.35);
+}
+
+.stream-action-primary:active {
+    transform: scale(0.96);
+}
+
+.stream-action-secondary {
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.74rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.stream-action-secondary:active {
+    background: rgba(0, 229, 255, 0.2);
+    border-color: #00e5ff;
+}
+
+/* Portals Box */
+.hindi-portals-box {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.portals-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.portals-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.portal-card-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 8px 10px;
+    color: #ffffff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.portal-card-btn:active {
+    background: rgba(0, 229, 255, 0.15);
+    border-color: #00e5ff;
+}
+
+.portal-card-btn i.arrow-icon {
+    font-size: 0.65rem;
+    color: var(--text-tertiary);
+}
+
+/* Smart Resolver Box */
+.hindi-smart-resolver {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.resolver-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.resolver-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.resolver-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 7px 10px;
+    color: #fff;
+    font-size: 0.72rem;
+    outline: none;
+}
+
+.resolver-input:focus {
+    border-color: #00e5ff;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
+}
+
+.resolver-play-btn {
+    background: linear-gradient(135deg, #00b4d8, #0077b6);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    padding: 7px 12px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.resolver-play-btn:active {
+    transform: scale(0.92);
+}

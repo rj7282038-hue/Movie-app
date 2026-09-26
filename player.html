@@ -67,48 +67,102 @@
                         <div class="hub-glass-card">
                             <div class="hub-header">
                                 <div class="hub-icon-wrapper">
-                                    <i class="fas fa-play"></i>
+                                    <i class="fas fa-satellite-dish"></i>
                                 </div>
                                 <div class="hub-title-box">
-                                    <h2 class="hub-title">EPIC MKV Player</h2>
-                                    <span class="hub-subtitle">Hardware Engine • Dual Audio • Subtitles</span>
+                                    <h2 class="hub-title">MovieBox Hindi Engine</h2>
+                                    <span class="hub-subtitle">4KHDHub • VegaMovies • HubCloud • MKV Player</span>
                                 </div>
                             </div>
 
-                            <div class="hub-badges-row">
-                                <span class="hub-badge"><i class="fas fa-film"></i> MKV / MP4 / WEBM</span>
-                                <span class="hub-badge"><i class="fas fa-headphones"></i> Dual-Audio (Hindi + Eng)</span>
-                                <span class="hub-badge"><i class="fas fa-closed-captioning"></i> Subtitles (.SRT)</span>
-                            </div>
-
-                            <!-- File Selection Action -->
-                            <div class="hub-action-section">
-                                <input type="file" id="localFileInput" accept="video/x-matroska,video/mkv,.mkv,video/mp4,.mp4,video/webm,.webm,video/*,.avi,.ts,.m4v" style="display: none;">
-                                <button class="hub-primary-btn" id="btnChooseLocalFile">
-                                    <i class="fas fa-folder-open"></i>
-                                    <span>Select MKV / Video from Phone</span>
+                            <!-- Hub Tabs -->
+                            <div class="hub-tab-nav">
+                                <button class="hub-tab-btn active" id="tabBtnHindiStreams">
+                                    <i class="fas fa-bolt"></i> 🇮🇳 Hindi Streams
+                                </button>
+                                <button class="hub-tab-btn" id="tabBtnLocalFile">
+                                    <i class="fas fa-folder-open"></i> 📁 Local File / URL
                                 </button>
                             </div>
 
-                            <!-- Or Paste Stream URL -->
-                            <div class="hub-url-row">
-                                <div class="hub-url-input-wrap">
-                                    <i class="fas fa-link hub-url-icon"></i>
-                                    <input type="text" id="localStreamUrlInput" class="hub-url-input" placeholder="Or paste direct .mkv / .mp4 URL...">
+                            <!-- Panel 1: Multi-Source Hindi Streams (Active by default) -->
+                            <div class="hub-tab-panel active" id="panelHindiStreams">
+                                <div class="hub-target-info">
+                                    <span class="hub-target-badge"><i class="fas fa-film"></i> <span id="hubMovieTitleText">Current Movie</span></span>
+                                    <span class="hub-badge" style="color: #00e5ff; border-color: rgba(0,229,255,0.4);"><i class="fas fa-headphones"></i> Hindi Dubbed</span>
                                 </div>
-                                <button class="hub-url-play-btn" id="btnPlayStreamUrl" title="Play Link">
-                                    <i class="fas fa-play"></i>
-                                </button>
+
+                                <!-- Fast Status & Scanner -->
+                                <div class="hub-scanner-card" id="hubScannerCard">
+                                    <div class="hub-scanner-spinner"></div>
+                                    <div class="hub-scanner-text">
+                                        <strong id="hubScannerTitle">Scanning Hindi Releases...</strong>
+                                        <span id="hubScannerDetail">Connecting to 4KHDHub & VegaMovies mirrors</span>
+                                    </div>
+                                    <button class="hub-rescan-btn" id="btnHubRescan" title="Rescan Hindi Sources">
+                                        <i class="fas fa-rotate"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Live Stream Results List inside Player Hub -->
+                                <div class="hub-streams-list" id="hubStreamsList">
+                                    <!-- Populated dynamically with Hindi streams -->
+                                </div>
+
+                                <!-- 1-Tap Source Portals Shortcuts -->
+                                <div class="hub-portals-row">
+                                    <span class="hub-portals-title"><i class="fas fa-link"></i> Direct Portals:</span>
+                                    <div class="hub-portals-chips" id="hubPortalsChips">
+                                        <!-- Dynamic links populated -->
+                                    </div>
+                                </div>
+
+                                <!-- Quick Stream Link Resolver -->
+                                <div class="hub-url-row">
+                                    <div class="hub-url-input-wrap">
+                                        <i class="fas fa-bolt hub-url-icon" style="color: #ffb703;"></i>
+                                        <input type="text" id="hubStreamUrlInput" class="hub-url-input" placeholder="Paste HubCloud / PixelDrain / MKV URL...">
+                                    </div>
+                                    <button class="hub-url-play-btn" id="btnPlayHubStreamUrl" title="Play Stream">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
                             </div>
 
-                            <!-- Demo Sample & Quick Help Footer -->
-                            <div class="hub-footer-row">
-                                <button class="hub-text-btn" id="btnPlayDemoClip">
-                                    <i class="fas fa-wand-magic-sparkles"></i> Play Demo Clip
-                                </button>
-                                <span class="hub-tip-text">
-                                    <i class="fas fa-circle-check" style="color: #00e5ff;"></i> Multi-Audio Track Switching
-                                </span>
+                            <!-- Panel 2: Phone Storage File / URL -->
+                            <div class="hub-tab-panel" id="panelLocalFile" style="display: none;">
+                                <div class="hub-badges-row">
+                                    <span class="hub-badge"><i class="fas fa-film"></i> MKV / MP4 / WEBM</span>
+                                    <span class="hub-badge"><i class="fas fa-headphones"></i> Dual-Audio (Hindi + Eng)</span>
+                                    <span class="hub-badge"><i class="fas fa-closed-captioning"></i> Subtitles (.SRT)</span>
+                                </div>
+
+                                <div class="hub-action-section">
+                                    <input type="file" id="localFileInput" accept="video/x-matroska,video/mkv,.mkv,video/mp4,.mp4,video/webm,.webm,video/*,.avi,.ts,.m4v" style="display: none;">
+                                    <button class="hub-primary-btn" id="btnChooseLocalFile">
+                                        <i class="fas fa-folder-open"></i>
+                                        <span>Select MKV / Video from Phone</span>
+                                    </button>
+                                </div>
+
+                                <div class="hub-url-row">
+                                    <div class="hub-url-input-wrap">
+                                        <i class="fas fa-link hub-url-icon"></i>
+                                        <input type="text" id="localStreamUrlInput" class="hub-url-input" placeholder="Or paste direct .mkv / .mp4 URL...">
+                                    </div>
+                                    <button class="hub-url-play-btn" id="btnPlayStreamUrl" title="Play Link">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+
+                                <div class="hub-footer-row">
+                                    <button class="hub-text-btn" id="btnPlayDemoClip">
+                                        <i class="fas fa-wand-magic-sparkles"></i> Play Demo Dual-Audio Clip
+                                    </button>
+                                    <span class="hub-tip-text">
+                                        <i class="fas fa-circle-check" style="color: #00e5ff;"></i> Channel Splitter
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -257,8 +311,11 @@
         <div class="server-bar-wrapper">
             <div class="server-bar">
                 <span class="server-label-hint"><i class="fas fa-headphones"></i> Audio:</span>
-                <button class="server-pill active" data-server="1">
-                    <span class="dot"></span> 🇮🇳 Smashy (Hindi / Dual)
+                <button class="server-pill server-pill-hindi active" data-server="hindi">
+                    <span class="dot dot-hindi"></span> 🇮🇳 MovieBox (Hindi Dubbed)
+                </button>
+                <button class="server-pill" data-server="1">
+                    <span class="dot"></span> 🌐 Smashy (Multi-Server)
                 </button>
                 <button class="server-pill" data-server="2">
                     <span class="dot"></span> ⚡ VidLink (Fast HD)
@@ -276,7 +333,7 @@
                     <span class="dot"></span> 🎬 AutoEmbed (Multi-Audio)
                 </button>
                 <button class="server-pill server-pill-local" data-server="local">
-                    <span class="dot dot-local"></span> 📁 Local (Multi-Lang)
+                    <span class="dot dot-local"></span> 📁 Local MKV
                 </button>
             </div>
         </div>
@@ -324,6 +381,66 @@
                 <span>Fullscreen</span>
             </button>
         </div>
+
+        <!-- MovieBox Multi-Source Hindi Streams (4KHDHub, VegaMovies, HDHub4u, HubCloud) -->
+        <section class="hindi-engine-section" id="hindiEngineSection">
+            <div class="hindi-engine-header">
+                <div class="hindi-engine-title-wrap">
+                    <span class="hindi-flag-badge"><i class="fas fa-headphones"></i> 🇮🇳 HINDI DUBBED</span>
+                    <h3 class="hindi-engine-heading">MovieBox Multi-Source Releases</h3>
+                </div>
+                <button class="hindi-refresh-btn" id="btnRefreshHindiStreams" title="Re-scan Hindi Sources">
+                    <i class="fas fa-arrows-rotate"></i> <span>Re-scan</span>
+                </button>
+            </div>
+            
+            <p class="hindi-engine-subtext">
+                Live stream link finder like MovieBox-TUI. Auto-finds Hindi Dubbed & Dual-Audio releases from 4KHDHub, VegaMovies, HDHub4u & HubCloud mirrors.
+            </p>
+
+            <!-- Search Bar for Custom Query if needed -->
+            <div class="hindi-search-bar">
+                <div class="hindi-search-input-wrap">
+                    <i class="fas fa-magnifying-glass"></i>
+                    <input type="text" id="hindiSearchInput" placeholder="Search Hindi Dubbed / Dual Audio title...">
+                </div>
+                <button class="hindi-search-btn" id="btnSearchHindiManual">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <!-- Live Status & Loader -->
+            <div class="hindi-scanner-status" id="hindiScannerStatus">
+                <div class="scanner-dot-pulse"></div>
+                <span id="hindiStatusMsg">Finding Hindi & Dual-Audio streams...</span>
+            </div>
+
+            <!-- Dynamic Results Stream Cards -->
+            <div class="hindi-streams-list" id="hindiStreamsList">
+                <!-- Dynamically generated releases -->
+            </div>
+
+            <!-- Direct 1-Tap Source Portals (4KHDHub, VegaMovies, HDHub4u, BollyFlix) -->
+            <div class="hindi-portals-box">
+                <div class="portals-label"><i class="fas fa-satellite-dish"></i> Direct 1-Tap Source Search Portals:</div>
+                <div class="portals-grid" id="hindiPortalsGrid">
+                    <!-- Dynamic links populated with movie title -->
+                </div>
+            </div>
+
+            <!-- Smart Link Streamer (Paste any HubCloud / PixelDrain / MKV link) -->
+            <div class="hindi-smart-resolver">
+                <div class="resolver-label">
+                    <i class="fas fa-bolt" style="color: #ffb703;"></i> Instant Stream Resolver (HubCloud / PixelDrain):
+                </div>
+                <div class="resolver-input-row">
+                    <input type="text" id="hindiResolverInput" class="resolver-input" placeholder="Paste HubCloud / PixelDrain / .mkv stream link...">
+                    <button class="resolver-play-btn" id="btnPlayResolvedStream">
+                        <i class="fas fa-play"></i> <span>Play in App</span>
+                    </button>
+                </div>
+            </div>
+        </section>
 
         <!-- Synopsis / Overview -->
         <div>
@@ -376,7 +493,8 @@
             <div class="ext-stream-picker">
                 <label for="extServerSelect"><i class="fas fa-server"></i> Choose Stream Server:</label>
                 <select id="extServerSelect" class="ext-select">
-                    <option value="1">🇮🇳 Server 1: Smashy (Hindi / Dual Audio)</option>
+                    <option value="hindi">🇮🇳 MovieBox Hindi: 4KHDHub / HubCloud (Hindi Dubbed)</option>
+                    <option value="1">🌐 Server 1: Smashy (Multi-Server)</option>
                     <option value="2">⚡ Server 2: VidLink Pro (Fast HD/4K)</option>
                     <option value="3">🔊 Server 3: Videasy (Multi-Lang)</option>
                     <option value="4">🌍 Server 4: SuperEmbed (Global Dubs)</option>
