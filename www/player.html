@@ -68,6 +68,9 @@
                         <button class="cinema-ctrl-btn" id="btnAudioHint" aria-label="Audio Language">
                             <i class="fas fa-headphones"></i> <span>Audio</span>
                         </button>
+                        <button class="cinema-ctrl-btn highlight-cinema-btn" id="btnExternalQuick" aria-label="Open in MX Player or VLC">
+                            <i class="fas fa-play-circle"></i> <span>MX / VLC</span>
+                        </button>
                         <button class="cinema-ctrl-btn" id="btnToggleZoom" aria-label="Toggle Screen Fill">
                             <i class="fas fa-maximize"></i> <span id="zoomBtnText">Fill Screen</span>
                         </button>
@@ -84,16 +87,22 @@
             <div class="server-bar">
                 <span class="server-label-hint"><i class="fas fa-headphones"></i> Audio:</span>
                 <button class="server-pill active" data-server="1">
-                    <span class="dot"></span> <i class="fas fa-bolt"></i> VidLink (Fast HD)
+                    <span class="dot"></span> 🇮🇳 Smashy (Hindi / Dual)
                 </button>
                 <button class="server-pill" data-server="2">
-                    <span class="dot"></span> 🇮🇳 Smashy (Hindi / Dual)
+                    <span class="dot"></span> ⚡ VidLink (Fast HD)
                 </button>
                 <button class="server-pill" data-server="3">
                     <span class="dot"></span> 🔊 Videasy (Multi-Lang)
                 </button>
                 <button class="server-pill" data-server="4">
                     <span class="dot"></span> 🌍 SuperEmbed (Global Dubs)
+                </button>
+                <button class="server-pill" data-server="5">
+                    <span class="dot"></span> 🚀 Embed.su (Multi-Stream)
+                </button>
+                <button class="server-pill" data-server="6">
+                    <span class="dot"></span> 🎬 AutoEmbed (Multi-Audio)
                 </button>
             </div>
         </div>
@@ -120,6 +129,10 @@
 
         <!-- Quick Action Bar -->
         <div class="media-actions-strip">
+            <button class="action-chip-btn highlight-external-btn" id="actionExternalBtn">
+                <i class="fas fa-play-circle"></i>
+                <span>MX / VLC</span>
+            </button>
             <button class="action-chip-btn" id="actionFavBtn">
                 <i class="far fa-heart"></i>
                 <span id="favBtnLabel">My List</span>
@@ -169,6 +182,87 @@
             <div class="grid-container" id="similarGrid" style="padding: 0;"></div>
         </section>
     </main>
+
+    <!-- External Player (MX Player / VLC) Bottom Sheet Modal -->
+    <div class="ext-modal-backdrop" id="extPlayerBackdrop">
+        <div class="ext-modal-sheet" id="extPlayerSheet">
+            <div class="ext-sheet-handle"></div>
+            <div class="ext-sheet-header">
+                <div class="ext-header-icon"><i class="fas fa-play-circle"></i></div>
+                <div class="ext-header-text">
+                    <h3>Play in MX Player / VLC</h3>
+                    <p>Native player with multi-audio & Hindi dubbing support</p>
+                </div>
+                <button class="ext-close-btn" id="extCloseBtn" aria-label="Close modal">
+                    <i class="fas fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Server Selector for External Stream -->
+            <div class="ext-stream-picker">
+                <label for="extServerSelect"><i class="fas fa-server"></i> Choose Stream Server:</label>
+                <select id="extServerSelect" class="ext-select">
+                    <option value="1">🇮🇳 Server 1: Smashy (Hindi / Dual Audio)</option>
+                    <option value="2">⚡ Server 2: VidLink Pro (Fast HD/4K)</option>
+                    <option value="3">🔊 Server 3: Videasy (Multi-Lang)</option>
+                    <option value="4">🌍 Server 4: SuperEmbed (Global Dubs)</option>
+                    <option value="5">🚀 Server 5: Embed.su (Multi-Stream)</option>
+                    <option value="6">🎬 Server 6: AutoEmbed (Multi-Audio)</option>
+                </select>
+            </div>
+
+            <!-- External Players Launch Cards -->
+            <div class="ext-options-grid">
+                <button class="ext-opt-card opt-mx" id="btnLaunchMx">
+                    <div class="ext-opt-icon"><i class="fas fa-play"></i></div>
+                    <div class="ext-opt-info">
+                        <strong>Open in MX Player</strong>
+                        <span>Hardware accelerated with Dual-Audio track support</span>
+                    </div>
+                    <i class="fas fa-arrow-up-right-from-square ext-arrow"></i>
+                </button>
+
+                <button class="ext-opt-card opt-vlc" id="btnLaunchVlc">
+                    <div class="ext-opt-icon"><i class="fas fa-cone-striped"></i></div>
+                    <div class="ext-opt-info">
+                        <strong>Open in VLC Player</strong>
+                        <span>Best for MKV, Hindi audio switching & subtitle sync</span>
+                    </div>
+                    <i class="fas fa-arrow-up-right-from-square ext-arrow"></i>
+                </button>
+
+                <button class="ext-opt-card opt-any" id="btnLaunchAny">
+                    <div class="ext-opt-icon"><i class="fas fa-mobile-screen"></i></div>
+                    <div class="ext-opt-info">
+                        <strong>Open with Any Player App</strong>
+                        <span>Choose from installed players on your phone</span>
+                    </div>
+                    <i class="fas fa-arrow-up-right-from-square ext-arrow"></i>
+                </button>
+            </div>
+
+            <!-- Copy Network Stream Link Box -->
+            <div class="ext-copy-box">
+                <div class="ext-copy-header">
+                    <span><i class="fas fa-link"></i> Direct Stream URL (Network Stream):</span>
+                    <button class="ext-copy-btn" id="btnCopyStreamLink">
+                        <i class="far fa-copy"></i> Copy Link
+                    </button>
+                </div>
+                <input type="text" class="ext-url-input" id="extStreamUrlInput" readonly value="">
+            </div>
+
+            <!-- Step-by-Step Hindi Dubbed Guide -->
+            <div class="ext-guide-card">
+                <div class="ext-guide-title"><i class="fas fa-circle-info"></i> Hindi Dubbing Kaise Chalu Karein?</div>
+                <ol class="ext-guide-steps">
+                    <li>Upar diye gaye <strong>MX Player</strong> ya <strong>VLC</strong> button par tap karein.</li>
+                    <li>Player khulne ke baad upar <strong>🎧 Audio Track</strong> icon par click karein.</li>
+                    <li><strong>Audio Track 2 (Hindi)</strong> select karein aur full Hindi me enjoy karein!</li>
+                </ol>
+            </div>
+        </div>
+    </div>
 
     <!-- Toast -->
     <div class="app-toast" id="appToast">

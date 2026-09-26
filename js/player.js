@@ -63,17 +63,17 @@
     // ═════════ Multi-Server URLs Builder (Multi-Audio Enabled) ═════════
     function getServerUrl(serverKey, id, type, s, e) {
         switch (serverKey) {
-            case '1': // VidLink Pro (Fastest, Multi-Audio & Subtitles track selection)
-                if (type === 'tv') {
-                    return `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=e50914&secondaryColor=121218&iconColor=ffffff&multiLang=true`;
-                }
-                return `https://vidlink.pro/movie/${id}?primaryColor=e50914&secondaryColor=121218&iconColor=ffffff&multiLang=true`;
-
-            case '2': // Smashy Stream (Dedicated Hindi, Dual Audio & Regional Dubs)
+            case '1': // Smashy Stream (Dedicated Hindi, Dual Audio & Regional Dubs - Default!)
                 if (type === 'tv') {
                     return `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`;
                 }
                 return `https://embed.smashystream.com/playere.php?tmdb=${id}`;
+
+            case '2': // VidLink Pro (Fastest, Multi-Audio & Subtitles track selection)
+                if (type === 'tv') {
+                    return `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=e50914&secondaryColor=121218&iconColor=ffffff&multiLang=true`;
+                }
+                return `https://vidlink.pro/movie/${id}?primaryColor=e50914&secondaryColor=121218&iconColor=ffffff&multiLang=true`;
 
             case '3': // Videasy Ultra (Clean Multi-Language Audio Switcher)
                 if (type === 'tv') {
@@ -87,8 +87,23 @@
                 }
                 return `https://multiembed.mov/?video_id=${id}&tmdb=1`;
 
+            case '5': // Embed.su (Fast High-Speed Resilient Server)
+                if (type === 'tv') {
+                    return `https://embed.su/embed/tv/${id}/${s}/${e}`;
+                }
+                return `https://embed.su/embed/movie/${id}`;
+
+            case '6': // AutoEmbed (Multi-Source Hindi & Regional Dubs)
+                if (type === 'tv') {
+                    return `https://player.autoembed.cc/embed/tv/${id}/${s}/${e}`;
+                }
+                return `https://player.autoembed.cc/embed/movie/${id}`;
+
             default:
-                return `https://vidlink.pro/movie/${id}?primaryColor=e50914&multiLang=true`;
+                if (type === 'tv') {
+                    return `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`;
+                }
+                return `https://embed.smashystream.com/playere.php?tmdb=${id}`;
         }
     }
 
@@ -126,10 +141,12 @@
         });
 
         const serverNames = {
-            '1': 'VidLink Pro (HD/4K)',
-            '2': 'Smashy Stream (Hindi / Dual)',
+            '1': 'Smashy Stream (Hindi / Dual)',
+            '2': 'VidLink Pro (HD/4K)',
             '3': 'Videasy (Multi-Lang)',
-            '4': 'SuperEmbed (Global Dubs)'
+            '4': 'SuperEmbed (Global Dubs)',
+            '5': 'Embed.su (Multi-Stream)',
+            '6': 'AutoEmbed (Multi-Audio)'
         };
         statusText.textContent = `Connecting to ${serverNames[serverKey] || 'Server'}...`;
         loader.style.display = 'flex';
@@ -506,7 +523,7 @@
             const targetServer = currentServer === '1' ? '2' : '1';
             loadStream(targetServer);
             if (serverQuickText) serverQuickText.textContent = `S${targetServer}`;
-            showToast(targetServer === '2' ? 'Switched to Hindi / Dual Audio' : 'Switched to Server 1');
+            showToast(targetServer === '1' ? 'Switched to Hindi / Dual Audio (Server 1)' : 'Switched to VidLink Pro (Server 2)');
             pingControls();
         });
     }
@@ -515,7 +532,7 @@
     if (serverQuickBtn) {
         serverQuickBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const nextServer = currentServer === '1' ? '2' : currentServer === '2' ? '3' : currentServer === '3' ? '4' : '1';
+            const nextServer = String((parseInt(currentServer, 10) % 6) + 1);
             loadStream(nextServer);
             if (serverQuickText) serverQuickText.textContent = `S${nextServer}`;
             showToast(`Switched to Server ${nextServer}`);
@@ -657,6 +674,132 @@
         const div = document.createElement('div');
         div.textContent = str;
         return div.innerHTML;
+    }
+
+    // ═════════ External Player (MX Player / VLC) Modal & Intent ═════════
+    const extPlayerBackdrop = document.getElementById('extPlayerBackdrop');
+    const extCloseBtn = document.getElementById('extCloseBtn');
+    const extServerSelect = document.getElementById('extServerSelect');
+    const extStreamUrlInput = document.getElementById('extStreamUrlInput');
+    const btnCopyStreamLink = document.getElementById('btnCopyStreamLink');
+    const btnLaunchMx = document.getElementById('btnLaunchMx');
+    const btnLaunchVlc = document.getElementById('btnLaunchVlc');
+    const btnLaunchAny = document.getElementById('btnLaunchAny');
+    const actionExternalBtn = document.getElementById('actionExternalBtn');
+    const btnExternalQuick = document.getElementById('btnExternalQuick');
+
+    function openExternalPlayerModal() {
+        if (!extPlayerBackdrop) return;
+        if (extServerSelect) extServerSelect.value = currentServer;
+        updateExternalStreamUrl();
+        extPlayerBackdrop.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeExternalPlayerModal() {
+        if (!extPlayerBackdrop) return;
+        extPlayerBackdrop.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    function getSelectedExternalUrl() {
+        const sKey = extServerSelect ? extServerSelect.value : currentServer;
+        return getServerUrl(sKey, mediaId, mediaType, currentSeason, currentEpisode);
+    }
+
+    function updateExternalStreamUrl() {
+        if (extStreamUrlInput) {
+            extStreamUrlInput.value = getSelectedExternalUrl();
+        }
+    }
+
+    if (extServerSelect) {
+        extServerSelect.addEventListener('change', updateExternalStreamUrl);
+    }
+
+    if (actionExternalBtn) {
+        actionExternalBtn.addEventListener('click', openExternalPlayerModal);
+    }
+    if (btnExternalQuick) {
+        btnExternalQuick.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openExternalPlayerModal();
+        });
+    }
+    if (extCloseBtn) {
+        extCloseBtn.addEventListener('click', closeExternalPlayerModal);
+    }
+    if (extPlayerBackdrop) {
+        extPlayerBackdrop.addEventListener('click', (e) => {
+            if (e.target === extPlayerBackdrop) closeExternalPlayerModal();
+        });
+    }
+
+    function launchExternalApp(intentUri, fallbackUrl, appName) {
+        try {
+            const streamUrl = getSelectedExternalUrl();
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(streamUrl).catch(() => {});
+            }
+            showToast(`Opening in ${appName}...`);
+            window.location.href = intentUri;
+        } catch (e) {
+            console.error('Launch error:', e);
+            if (fallbackUrl) {
+                window.open(fallbackUrl, '_system');
+            }
+        }
+    }
+
+    // Launch in MX Player
+    if (btnLaunchMx) {
+        btnLaunchMx.addEventListener('click', () => {
+            const streamUrl = getSelectedExternalUrl();
+            const titleStr = mediaDetails ? (mediaDetails.title || mediaDetails.name || 'Video') : 'Video';
+            const mxIntent = `intent:${streamUrl}#Intent;package=com.mxtech.videoplayer.ad;type=video/*;S.title=${encodeURIComponent(titleStr)};end`;
+            launchExternalApp(mxIntent, streamUrl, 'MX Player');
+        });
+    }
+
+    // Launch in VLC Player
+    if (btnLaunchVlc) {
+        btnLaunchVlc.addEventListener('click', () => {
+            const streamUrl = getSelectedExternalUrl();
+            const titleStr = mediaDetails ? (mediaDetails.title || mediaDetails.name || 'Video') : 'Video';
+            const vlcIntent = `intent:${streamUrl}#Intent;package=org.videolan.vlc;type=video/*;S.title=${encodeURIComponent(titleStr)};end`;
+            launchExternalApp(vlcIntent, `vlc://${streamUrl}`, 'VLC Player');
+        });
+    }
+
+    // Launch in Any Player (Universal Android chooser)
+    if (btnLaunchAny) {
+        btnLaunchAny.addEventListener('click', () => {
+            const streamUrl = getSelectedExternalUrl();
+            const universalIntent = `intent:${streamUrl}#Intent;action=android.intent.action.VIEW;type=video/*;end`;
+            launchExternalApp(universalIntent, streamUrl, 'Video Player');
+        });
+    }
+
+    // 1-Tap Copy Stream Link
+    if (btnCopyStreamLink) {
+        btnCopyStreamLink.addEventListener('click', async () => {
+            const url = getSelectedExternalUrl();
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(url);
+                } else if (extStreamUrlInput) {
+                    extStreamUrlInput.select();
+                    document.execCommand('copy');
+                }
+                showToast('✅ Stream Link Copied! Network Stream me paste karein');
+                btnCopyStreamLink.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                setTimeout(() => {
+                    btnCopyStreamLink.innerHTML = '<i class="far fa-copy"></i> Copy Link';
+                }, 2500);
+            } catch (err) {
+                showToast('Link select karke manually copy karein');
+            }
+        });
     }
 
     // ═════════ Initialize ═════════
